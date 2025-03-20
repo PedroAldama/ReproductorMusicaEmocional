@@ -1,0 +1,11 @@
+package com.reproductor.music.services;
+import com.reproductor.music.dto.DTOGroup;
+import com.reproductor.music.dto.request.RequestGroup;
+import com.reproductor.music.entities.Group;
+
+import java.util.*;
+public interface GroupService {
+     List<DTOGroup> findAll();
+     Group findByName(String name);
+     void save(RequestGroup group);
+}
