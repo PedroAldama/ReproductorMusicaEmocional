@@ -2,6 +2,7 @@ package com.reproductor.music.services;
 
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
+import com.reproductor.music.entities.History;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.SongRepository;
@@ -26,6 +27,7 @@ public class SongServiceImpl implements SongService {
 
     private static final String BASE_FOLDER = "C:/Users/Pedro/Desktop/songs/MusicFile/";
     private final SongRepository songRepository;
+
 
     @Override
     public List<DTOSong> getAllSongsResponse() {

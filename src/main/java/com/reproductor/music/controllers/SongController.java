@@ -2,6 +2,7 @@ package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
+import com.reproductor.music.services.RedisServiceImp;
 import com.reproductor.music.services.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,15 +19,18 @@ import java.util.List;
 public class SongController {
 
     private final SongService songService;
+    private final RedisServiceImp redisService;
 
     @GetMapping
     public ResponseEntity<List<DTOSong>> getAllSongs() {
         return ResponseEntity.ok(songService.getAllSongsResponse());
     }
 
-    @GetMapping("/name")
+    @GetMapping("/play")
     public ResponseEntity<DTOSong> getSongByName(@RequestParam String name) {
-        return ResponseEntity.ok(songService.getSongByNameResponse(name));
+        DTOSong song = songService.getSongByNameResponse(name);
+        redisService.addSongToList(song.getName());
+        return ResponseEntity.ok(song);
     }
 
     @PostMapping("/add")
