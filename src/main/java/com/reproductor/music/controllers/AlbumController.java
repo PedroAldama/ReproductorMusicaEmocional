@@ -20,22 +20,22 @@ public class AlbumController {
     public ResponseEntity<List<DTOAlbum>> getAll() {
         return ResponseEntity.ok(albumService.getAllAlbums());
     }
-    @GetMapping("/name/{name}")
-    public ResponseEntity<DTOAlbum> getByName(@PathVariable String name) {
+    @GetMapping("/name")
+    public ResponseEntity<DTOAlbum> getByName(@RequestParam String name) {
         return ResponseEntity.ok(albumService.getAlbumByTitleResponse(name));
     }
 
-    @GetMapping("/artist/{artist}")
-    public ResponseEntity<List<DTOAlbum>> getAllByArtist(@PathVariable String artist) {
+    @GetMapping("/artist")
+    public ResponseEntity<List<DTOAlbum>> getAllByArtist(@RequestParam String artist) {
         return ResponseEntity.ok(albumService.getAlbumsByArtistResponse(artist));
     }
 
-    @GetMapping("/release/{start}/{end}")
-    public ResponseEntity<List<DTOAlbum>> getAllByRelease(@PathVariable int start, @PathVariable int end) {
+    @GetMapping("/release")
+    public ResponseEntity<List<DTOAlbum>> getAllByRelease(@RequestParam int start, @RequestParam int end) {
         return ResponseEntity.ok(albumService.getAlbumsByRangeResponse(start,end));
     }
-    @GetMapping("/{artist}/{start}/{end}")
-    public ResponseEntity<List<DTOAlbum>> getAllByNameAndRelease(@PathVariable String artist, @PathVariable int start, @PathVariable int end) {
+    @GetMapping("/artist/date")
+    public ResponseEntity<List<DTOAlbum>> getAllByNameAndRelease(@RequestParam String artist, @RequestParam int start, @RequestParam int end) {
         return ResponseEntity.ok(albumService.getAlbumsByArtistAndRangeResponse(artist,start,end));
     }
 
@@ -45,8 +45,8 @@ public class AlbumController {
         return ResponseEntity.status(HttpStatus.CREATED).body(album);
     }
 
-    @PostMapping("/add/{album}")
-    public ResponseEntity<DTOAlbum> addSongToAlbum(@PathVariable String album, @RequestBody List<String> songs) {
+    @PostMapping("/addToAlbum")
+    public ResponseEntity<DTOAlbum> addSongToAlbum(@RequestParam String album, @RequestBody List<String> songs) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(albumService.addSongsToAlbum(album, songs));
     }
 }

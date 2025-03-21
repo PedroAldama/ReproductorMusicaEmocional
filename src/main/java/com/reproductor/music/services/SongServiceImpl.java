@@ -47,7 +47,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional
-    public DTOSong addSong(String song, double duration, MultipartFile file) throws IOException {
+    public DTOSong addSong(RequestSong song, MultipartFile file) throws IOException {
 
         File directory = new File(BASE_FOLDER);
         if (!directory.exists()) {
@@ -63,8 +63,8 @@ public class SongServiceImpl implements SongService {
         file.transferTo(path.toFile());
 
         Song newSong = Song.builder()
-                .name(song)
-                .duration(duration)
+                .name(song.getTitle())
+                .duration(song.getDuration())
                 .src("MusicFile/" + song + extension)
                 .build();
         songRepository.save(newSong);
