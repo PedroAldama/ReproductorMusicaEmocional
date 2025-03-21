@@ -25,8 +25,8 @@ public class ListController {
         return ResponseEntity.ok(listService.getAllList());
     }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<DTOLIST> listByName(@PathVariable String name) {
+    @GetMapping("/name")
+    public ResponseEntity<DTOLIST> listByName(@RequestParam String name) {
         return ResponseEntity.ok(listService.getListByName(name));
     }
 

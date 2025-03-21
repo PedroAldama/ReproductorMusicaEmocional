@@ -24,13 +24,13 @@ public class SongController {
         return ResponseEntity.ok(songService.getAllSongsResponse());
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<DTOSong> getSongByName(@PathVariable String name) {
+    @GetMapping("/name")
+    public ResponseEntity<DTOSong> getSongByName(@RequestParam String name) {
         return ResponseEntity.ok(songService.getSongByNameResponse(name));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<DTOSong>addSong(@RequestParam String song, @RequestParam double duration , @RequestParam("file") MultipartFile file) throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(songService.addSong(song,duration,file));
+    public ResponseEntity<DTOSong>addSong( @RequestParam("file") MultipartFile file, @RequestBody RequestSong song) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(songService.addSong(song,file));
     }
 }
