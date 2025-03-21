@@ -8,5 +8,4 @@ import lombok.Data;
 public class RequestSong {
     private String title;
     private double duration;
-    private String src;
 }
