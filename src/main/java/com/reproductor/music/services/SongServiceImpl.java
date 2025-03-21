@@ -8,7 +8,12 @@ import com.reproductor.music.repositories.SongRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -19,6 +24,7 @@ import static com.reproductor.music.dto.Convert.convertSongToDto;
 @RequiredArgsConstructor
 public class SongServiceImpl implements SongService {
 
+    private static final String BASE_FOLDER = "C:/Users/Pedro/Desktop/songs/MusicFile/";
     private final SongRepository songRepository;
 
     @Override
@@ -40,19 +46,54 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public DTOSong addSong(RequestSong song) {
+    @Transactional
+    public DTOSong addSong(String song, double duration, MultipartFile file) throws IOException {
+
+        File directory = new File(BASE_FOLDER);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = getExtension(file, originalFilename);
+
+        String fileName = song + extension;
+        Path path = Paths.get(BASE_FOLDER + fileName);
+
+        file.transferTo(path.toFile());
+
         Song newSong = Song.builder()
-                .name(song.getTitle())
-                .duration(song.getDuration())
-                .src(song.getSrc())
+                .name(song)
+                .duration(duration)
+                .src("MusicFile/" + song + extension)
                 .build();
-        save(newSong);
+        songRepository.save(newSong);
         return getSongByNameResponse(newSong.getName());
+    }
+
+    private static String getExtension(MultipartFile file, String originalFilename) {
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        } else {
+            // Como respaldo, obtenemos la extensión del tipo MIME
+            String mimeType = file.getContentType();
+            if (mimeType != null) {
+                extension = switch (mimeType) {
+                    case "audio/mpeg" -> ".mp3";
+                    case "audio/wav" -> ".wav";
+                    case "audio/ogg" -> ".ogg";
+                    default -> "";
+                };
+            }
+        }
+        return extension;
     }
 
     @Override
     @Transactional
-    public void save(Song song){
+    public void save(Song song) {
         songRepository.save(song);
     }
 
