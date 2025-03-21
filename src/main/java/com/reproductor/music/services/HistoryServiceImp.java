@@ -1,6 +1,5 @@
 package com.reproductor.music.services;
 
-import com.reproductor.music.entities.Feelings;
 import com.reproductor.music.entities.History;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
@@ -8,6 +7,7 @@ import com.reproductor.music.repositories.HistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -16,6 +16,7 @@ public class HistoryServiceImp implements HistoryService {
 
     private final HistoryRepository historyRepository;
     private final SongService songService;
+    private final RedisServiceImp redisService;
 
     @Override
     public List<Song> recommendByEmotion(String user) {
@@ -35,5 +36,34 @@ public class HistoryServiceImp implements HistoryService {
         }
         String principal = Collections.max(feelSum.entrySet(), Map.Entry.comparingByValue()).getKey();
         return List.of();
+    }
+
+    @Override
+    public void createHistory(String user) {
+        History history = History.builder()
+                .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
+                .user(user)
+                .creation(new Date())
+                .songs(redisService.getFullList())
+                .build();
+        historyRepository.save(history);
+        redisService.clearList();
+    }
+
+    @Override
+    public void addToHistory(String user, Song song) {
+
+    }
+
+    @Override
+    public History getHistory(String user, Date date) {
+        return historyRepository
+                .findById(new SimpleDateFormat("dd-MM-yyyy").format(date) + user)
+                .orElse(null);
+    }
+
+    @Override
+    public List<History> getAllHistory() {
+        return historyRepository.findAll();
     }
 }
