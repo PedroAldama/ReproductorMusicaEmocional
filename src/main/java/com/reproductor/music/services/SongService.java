@@ -14,4 +14,5 @@ public interface SongService {
      DTOSong getSongByNameResponse(String name);
      DTOSong addSong(RequestSong song, MultipartFile file) throws IOException;
      void save(Song song);
+     List<Song> findAllWithFeeling();
 }

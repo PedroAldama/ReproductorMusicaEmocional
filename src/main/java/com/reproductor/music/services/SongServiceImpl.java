@@ -40,7 +40,6 @@ public class SongServiceImpl implements SongService {
                 .orElseThrow(() -> new SongException.SongNotFoundException(name + " Not found"));
     }
 
-
     @Override
     public DTOSong getSongByNameResponse(String name) {
         return convertSongToDto(songRepository.findByName(name)
@@ -97,6 +96,11 @@ public class SongServiceImpl implements SongService {
     @Transactional
     public void save(Song song) {
         songRepository.save(song);
+    }
+
+    @Override
+    public List<Song> findAllWithFeeling() {
+        return songRepository.findAllWithFeelings();
     }
 
 
