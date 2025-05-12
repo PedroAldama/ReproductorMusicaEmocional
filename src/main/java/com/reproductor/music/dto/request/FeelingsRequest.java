@@ -1,0 +1,13 @@
+package com.reproductor.music.dto.request;
+
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+@Builder
+public class FeelingsRequest {
+    private String songName;
+    private List<Integer> feelings;
+}

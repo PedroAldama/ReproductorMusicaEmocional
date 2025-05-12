@@ -1,11 +1,10 @@
 package com.reproductor.music.dto;
 
-import com.reproductor.music.entities.Album;
-import com.reproductor.music.entities.Group;
-import com.reproductor.music.entities.Lista;
-import com.reproductor.music.entities.Song;
+import com.reproductor.music.dto.request.DTOVectorSong;
+import com.reproductor.music.entities.*;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
 
 public class Convert {
@@ -62,5 +61,17 @@ public class Convert {
     }
     public static List<DTOLIST> convertListDtoList(List<Lista> lists){
         return lists.stream().map(Convert::convertListToDTO).toList();
+    }
+
+    public static List<DTOVectorSong> getAllSongsWithFeelings(List<Song> songs  ) {
+        return songs.stream()
+                .map(song -> {
+                    List<Integer> values = song.getSongFeelings().stream()
+                            .sorted(Comparator.comparing(sf -> sf.getFeeling().getId()))
+                            .map(SongFeelings::getValue)
+                            .toList();
+                    return  DTOVectorSong.builder().title(song.getName()).feelings(values).build();
+                })
+                .toList();
     }
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class SongFeelings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "song_id", nullable = false)
@@ -24,6 +24,10 @@ public class SongFeelings {
     @ManyToOne
     @JoinColumn(name = "feeling_id", nullable = false)
     private Feelings feeling;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
     private int value;
 }
