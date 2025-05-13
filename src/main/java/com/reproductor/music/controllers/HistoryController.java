@@ -19,6 +19,7 @@ public class HistoryController {
     public List<History> getAll(){
         return historyService.getAllHistory();
     }
+
     @GetMapping("/user")
     public History getUserHistory(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date date, @RequestParam String user){
         return historyService.getHistory(user,date);
