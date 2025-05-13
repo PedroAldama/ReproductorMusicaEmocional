@@ -40,13 +40,20 @@ public class HistoryServiceImp implements HistoryService {
 
     @Override
     public void createHistory(String user) {
-        History history = History.builder()
-                .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
-                .user(user)
-                .creation(new Date())
-                .songs(redisService.getFullList())
-                .build();
-        historyRepository.save(history);
+        History searchHistory = getHistory(user, new Date());
+        if(searchHistory == null) {
+            History history = History.builder()
+                    .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
+                    .user(user)
+                    .creation(new Date())
+                    .songs(redisService.getFullList())
+                    .build();
+                    historyRepository.save(history);
+        }else{
+                redisService.getFullList().forEach(s -> searchHistory.getSongs().add(s));
+                historyRepository.save(searchHistory);
+        }
+
         redisService.clearList();
     }
 
