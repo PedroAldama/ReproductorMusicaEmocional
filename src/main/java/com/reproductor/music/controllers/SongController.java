@@ -27,9 +27,9 @@ public class SongController {
     }
 
     @GetMapping("/play")
-    public ResponseEntity<DTOSong> getSongByName(@RequestParam String name) {
+    public ResponseEntity<DTOSong> getSongByName(@RequestParam String name, @RequestParam String user) {
         DTOSong song = songService.getSongByNameResponse(name);
-        redisService.addSongToList(song.getName());
+        redisService.addSongToList(user,song.getName());
         return ResponseEntity.ok(song);
     }
 

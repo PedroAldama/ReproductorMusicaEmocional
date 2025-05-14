@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,15 +47,19 @@ public class HistoryServiceImp implements HistoryService {
                     .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
                     .user(user)
                     .creation(new Date())
-                    .songs(redisService.getFullList())
+                    .songs(redisService.getFullList(user))
                     .build();
                     historyRepository.save(history);
         }else{
-                redisService.getFullList().forEach(s -> searchHistory.getSongs().add(s));
-                historyRepository.save(searchHistory);
+            List<String> songs = Stream.concat(
+                    redisService.getFullList(user).stream(),
+                    searchHistory.getSongs().stream()
+            ).toList();
+            searchHistory.setSongs(songs);
+            historyRepository.save(searchHistory);
         }
 
-        redisService.clearList();
+        redisService.clearList(user);
     }
 
     @Override

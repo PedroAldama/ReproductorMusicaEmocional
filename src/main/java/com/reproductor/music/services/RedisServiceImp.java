@@ -13,15 +13,14 @@ public class RedisServiceImp {
     private final StringRedisTemplate redisTemplate;
     private static final String LIST_KEY = "list";
 
-
-    public void addSongToList(String song) {
-        redisTemplate.opsForList().leftPush(LIST_KEY, song);
+    public void addSongToList(String user,String song) {
+        redisTemplate.opsForList().leftPush(LIST_KEY + user, song);
     }
-    public List<String> getFullList(){
-        return redisTemplate.opsForList().range(LIST_KEY, 0, -1);
+    public List<String> getFullList(String user){
+        return redisTemplate.opsForList().range(LIST_KEY + user, 0, -1);
     }
 
-    public void clearList(){
-        redisTemplate.delete(LIST_KEY);
+    public void clearList(String user){
+        redisTemplate.delete(LIST_KEY + user);
     }
 }
