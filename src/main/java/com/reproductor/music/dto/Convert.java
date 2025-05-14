@@ -66,9 +66,10 @@ public class Convert {
     public static List<DTOVectorSong> getAllSongsWithFeelings(List<Song> songs  ) {
         return songs.stream()
                 .map(song -> {
-                    List<Integer> values = song.getSongFeelings().stream()
+                    List<Double> values = song.getSongFeelings().stream()
                             .sorted(Comparator.comparing(sf -> sf.getFeeling().getId()))
                             .map(SongFeelings::getValue)
+                            .map(v-> (double)v)
                             .toList();
                     return  DTOVectorSong.builder().title(song.getName()).feelings(values).build();
                 })

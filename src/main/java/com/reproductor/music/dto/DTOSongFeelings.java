@@ -11,5 +11,5 @@ import java.util.Map;
 @Data
 public class DTOSongFeelings {
     private String name;
-    private Map<String,Integer> feelings;
+    private Map<String,Double> feelings;
 }

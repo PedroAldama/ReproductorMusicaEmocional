@@ -29,5 +29,5 @@ public class SongFeelings {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    private int value;
+    private double value;
 }

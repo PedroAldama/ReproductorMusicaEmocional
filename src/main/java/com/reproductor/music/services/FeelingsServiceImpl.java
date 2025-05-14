@@ -4,10 +4,12 @@ import com.reproductor.music.dto.DTOSongFeelings;
 import com.reproductor.music.dto.request.DTOVectorSong;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
+import com.reproductor.music.entities.Users;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.FeelingsRepository;
 import com.reproductor.music.dto.request.FeelingsRequest;
 import com.reproductor.music.repositories.SongFeelingRepository;
+import com.reproductor.music.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +21,12 @@ import static com.reproductor.music.dto.Convert.getAllSongsWithFeelings;
 @Service
 public class FeelingsServiceImpl implements FeelingsService {
 
+    private static final String FEELING_KEY = "feeling";
     private final SongService songService;
     private final FeelingsRepository repository;
     private final SongFeelingRepository songFeelingRepository;
+    private final UserRepository userRepository;
+    private final RedisServiceImp redisService;
 
     @Override
     public void addFeelings(FeelingsRequest feelings) {
@@ -45,9 +50,28 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
 
     @Override
-    public DTOVectorSong searchSongBySimilarFeelings(List<Integer> feelingValues, String name) {
+    public DTOVectorSong searchSongBySimilarFeelings(String name) {
        List<DTOVectorSong> songs = getAllSongsWithFeelings(songService.findAllWithFeeling());
-        return findMostSimilarSong(feelingValues,songs, name);
+        return findMostSimilarSong(getCurrentFeelingsByUser(name),songs, name);
+    }
+
+    @Override
+    public List<DTOVectorSong> getFeelingsByUser(String user, List<String> songs) {
+        Users userDb = userRepository.findByUsername(user).orElseThrow();
+        return songs.stream()
+                .map(song ->{
+                    Song songDb = songService.getSongByName(song);
+                    List<Double> feelings = songFeelingRepository.findBySongAndUser(songDb,userDb)
+                            .stream()
+                            .sorted(Comparator.comparing(sf->sf.getFeeling().getId()))
+                            .map(SongFeelings::getValue)
+                            .map(v->(double)v)
+                            .toList();
+                    return DTOVectorSong.builder()
+                            .title(song)
+                            .feelings(feelings)
+                            .build();
+                }).toList();
     }
 
     @Override
@@ -62,17 +86,31 @@ public class FeelingsServiceImpl implements FeelingsService {
             .feelings(getFeelingsMap(songFeelings)).build();
     }
 
-    private Map<String,Integer> getFeelingsMap(List<SongFeelings> songFeelings){
-        Map<String,Integer> data = new HashMap<>();
-        String[] feeling = {"Alegria", "Tristeza", "Calma", "Euforia", "Melancolia", "Amor", "Ira",
-                "Ansiedad", "Misterio", "Empoderamiento"};
-        for (int i = 0; i < songFeelings.size(); i++) {
-            data.put(feeling[i], songFeelings.get(i).getValue());
+    @Override
+    public List<Double> getCurrentFeelingsByUser(String user) {
+        String feelings = redisService.getCurrentFeeling(user);
+
+        if(feelings != null && !feelings.isEmpty()){
+            return Arrays.stream(feelings.split(",")).map(Double::valueOf).toList();
         }
-        return data;
+
+        return createCurrentFeeling(user);
     }
 
-    private double cosineSimilarity(List<Integer> v1, List<Integer> v2) {
+    public List<Double> createCurrentFeeling(String user){
+        List<String> songs = redisService.getListOf(user,2);
+        List<double[]> data = getFeelingsByUser(user,songs)
+                .stream()
+                .map(DTOVectorSong::getFeelings)
+                .map(list-> list.stream().mapToDouble(i->i).toArray())
+                .map(FeelingsServiceImpl::normalize)
+                .toList();
+        List<Double> res = average(data);
+        redisService.setCurrentFeeling(user,res);
+        return res;
+    }
+
+    private double cosineSimilarity(List<Double> v1, List<Double> v2) {
         double dot = 0.0;
         double normA = 0.0;
         double normB = 0.0;
@@ -85,11 +123,42 @@ public class FeelingsServiceImpl implements FeelingsService {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    private DTOVectorSong findMostSimilarSong(List<Integer> userVector, List<DTOVectorSong> allSongs, String name) {
+    private DTOVectorSong findMostSimilarSong(List<Double> userVector, List<DTOVectorSong> allSongs, String name) {
         return allSongs.stream()
                 .filter(song -> !song.getFeelings().isEmpty() && !song.getTitle().equals(name))
                 .max(Comparator.comparingDouble(song ->
                         cosineSimilarity(userVector, song.getFeelings())))
                 .orElse(null);
     }
+
+    public static double[] normalize(double[] vector) {
+        return Arrays.stream(vector)
+                .map(val -> val / 10.0)
+                .toArray();
+    }
+    public static List<Double> average(List<double[]> vector) {
+        int size = vector.getFirst().length;
+        double[] avg = new double[size];
+        List<Double> data = new ArrayList<>();
+        for(double[] vec: vector){
+            for(int i = 0; i < size; i++){
+                avg[i] += vec[i];
+            }
+        }
+        for(int i = 0; i < size; i++){
+            data.add(avg[i] / size);
+        }
+        return data;
+    }
+    private Map<String,Double> getFeelingsMap(List<SongFeelings> songFeelings){
+        Map<String,Double> data = new HashMap<>();
+        String[] feeling = {"Alegria", "Tristeza", "Calma", "Euforia", "Melancolia", "Amor", "Ira",
+                "Ansiedad", "Misterio", "Empoderamiento"};
+        for (int i = 0; i < songFeelings.size(); i++) {
+            data.put(feeling[i], songFeelings.get(i).getValue());
+        }
+        return data;
+    }
 }
+
+ 
