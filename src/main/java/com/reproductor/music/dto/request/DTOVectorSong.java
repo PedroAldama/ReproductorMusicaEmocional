@@ -10,5 +10,5 @@ import java.util.List;
 @Data
 public class DTOVectorSong {
     private String title;
-    private List<Integer> feelings = new ArrayList<>();
+    private List<Double> feelings = new ArrayList<>();
 }

@@ -32,7 +32,7 @@ public class HistoryServiceImp implements HistoryService {
             List<SongFeelings> emotions = songService.getSongByName(song).getSongFeelings();
             for (SongFeelings e : emotions) {
                 String feeling = e.getFeeling().getFeeling();
-                feelSum.put(feeling, feelSum.getOrDefault(feeling, 0) + e.getValue());
+                feelSum.put(feeling, (int) (feelSum.getOrDefault(feeling, 0) + e.getValue()));
             }
         }
         String principal = Collections.max(feelSum.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -64,7 +64,7 @@ public class HistoryServiceImp implements HistoryService {
 
     @Override
     public void addToHistory(String user, Song song) {
-
+    //Return something
     }
 
     @Override

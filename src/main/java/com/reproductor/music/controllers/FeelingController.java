@@ -8,27 +8,36 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/feelings")
+@RequestMapping("/api/feelings")
 public class FeelingController {
 
     private final FeelingsService feelingsService;
 
+    @GetMapping("/test")
+    public ResponseEntity<?> test(@RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.findMostSimilarSongs(user));
+    }
+    @GetMapping("/avg")
+    public ResponseEntity<?> avg(@RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser(user));
+    }
     @GetMapping
-    public ResponseEntity<?> getSongFeelings(@RequestParam String name) {
-        return ResponseEntity.ok(feelingsService.searchByName(name));
+    public ResponseEntity<?> getSongFeelings(@RequestParam String name, @RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.searchByName(name,user));
     }
 
-    @PostMapping("/recomendation")
-    public DTOVectorSong getSimilarFeelings(@RequestBody TestSimilarity request) {
-        System.out.println(request.getName());
-        return feelingsService.searchSongBySimilarFeelings(request.getVector(),request.getName());
+    @PostMapping("/recommendation")
+    public DTOVectorSong getSimilarFeelings(@RequestParam String user) {
+        return feelingsService.searchSongBySimilarFeelings(user);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addSongFeeling(@RequestBody FeelingsRequest request) {
-        feelingsService.addFeelings(request);
+    public ResponseEntity<?> addSongFeeling(@RequestBody FeelingsRequest request,@RequestParam String user) {
+        feelingsService.addFeelings(request,user);
         return  ResponseEntity.ok("Feelings added successfully to " + request.getSongName());
     }
 }
