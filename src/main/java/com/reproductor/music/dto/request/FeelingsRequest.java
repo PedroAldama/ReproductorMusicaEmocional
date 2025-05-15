@@ -9,5 +9,5 @@ import java.util.List;
 @Builder
 public class FeelingsRequest {
     private String songName;
-    private List<Integer> feelings;
+    private List<Double> feelings;
 }

@@ -18,16 +18,16 @@ public class FeelingController {
     private final FeelingsService feelingsService;
 
     @GetMapping("/test")
-    public ResponseEntity<?> test(@RequestBody List<String> data) {
-        return ResponseEntity.ok(feelingsService.getFeelingsByUser("Hikari",data));
+    public ResponseEntity<?> test(@RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.findMostSimilarSongs(user));
     }
     @GetMapping("/avg")
     public ResponseEntity<?> avg(@RequestParam String user) {
         return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser(user));
     }
     @GetMapping
-    public ResponseEntity<?> getSongFeelings(@RequestParam String name) {
-        return ResponseEntity.ok(feelingsService.searchByName(name));
+    public ResponseEntity<?> getSongFeelings(@RequestParam String name, @RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.searchByName(name,user));
     }
 
     @PostMapping("/recommendation")
@@ -36,8 +36,8 @@ public class FeelingController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addSongFeeling(@RequestBody FeelingsRequest request) {
-        feelingsService.addFeelings(request);
+    public ResponseEntity<?> addSongFeeling(@RequestBody FeelingsRequest request,@RequestParam String user) {
+        feelingsService.addFeelings(request,user);
         return  ResponseEntity.ok("Feelings added successfully to " + request.getSongName());
     }
 }

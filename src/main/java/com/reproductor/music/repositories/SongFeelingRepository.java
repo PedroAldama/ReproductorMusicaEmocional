@@ -10,4 +10,5 @@ import java.util.List;
 public interface SongFeelingRepository extends CrudRepository<SongFeelings,Long> {
     List<SongFeelings> findBySong(Song song);
     List<SongFeelings> findBySongAndUser(Song song, Users user);
+    List<SongFeelings> findByUser(Users user);
 }

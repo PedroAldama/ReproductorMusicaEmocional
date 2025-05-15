@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.reproductor.music.dto.Convert.getAllSongsWithFeelings;
-
 @RequiredArgsConstructor
 @Service
 public class FeelingsServiceImpl implements FeelingsService {
@@ -29,58 +27,63 @@ public class FeelingsServiceImpl implements FeelingsService {
     private final RedisServiceImp redisService;
 
     @Override
-    public void addFeelings(FeelingsRequest feelings) {
+    public void addFeelings(FeelingsRequest feelings, String user) {
         Song song = songService.getSongByName(feelings.getSongName());
+        Users userDb = userRepository.findByUsername(user).orElseThrow();
         if (song == null) {
             throw new SongException.SongNotFoundException(feelings.getSongName());
         }
         int i = 1;
-        for(int n: feelings.getFeelings()) {
+        for(Double n: feelings.getFeelings()) {
              SongFeelings newSongFeeling = new SongFeelings();
              newSongFeeling.setSong(song);
              newSongFeeling.setFeeling(repository.findById((long) i++).orElseThrow());
              newSongFeeling.setValue(n);
+             newSongFeeling.setUser(userDb);
              songFeelingRepository.save(newSongFeeling);
         }
     }
 
     @Override
-    public void updateFeelings(FeelingsRequest feelings) {
-
+    public void updateFeelings(FeelingsRequest feelings,String user) {
+        addFeelings(feelings,user);
     }
 
     @Override
     public DTOVectorSong searchSongBySimilarFeelings(String name) {
-       List<DTOVectorSong> songs = getAllSongsWithFeelings(songService.findAllWithFeeling());
-        return findMostSimilarSong(getCurrentFeelingsByUser(name),songs, name);
+        /*Users user = getUser(name);
+        List<Song> songsByUser = songFeelingRepository.findByUser(user).stream().map(SongFeelings::getSong).toList();
+        List<DTOVectorSong> songs = getAllSongsWithFeelings(songsByUser);
+        return findMostSimilarSong(getCurrentFeelingsByUser(name),songs, name);*/
+        return null;
     }
 
     @Override
-    public List<DTOVectorSong> getFeelingsByUser(String user, List<String> songs) {
-        Users userDb = userRepository.findByUsername(user).orElseThrow();
+    public List<DTOVectorSong> getFeelingsByUser(String user, List<Song> songs) {
+        Users userDb = getUser(user);
         return songs.stream()
                 .map(song ->{
-                    Song songDb = songService.getSongByName(song);
-                    List<Double> feelings = songFeelingRepository.findBySongAndUser(songDb,userDb)
+                    List<Double> feelings = songFeelingRepository.findBySongAndUser(song,userDb)
                             .stream()
                             .sorted(Comparator.comparing(sf->sf.getFeeling().getId()))
                             .map(SongFeelings::getValue)
                             .map(v->(double)v)
                             .toList();
                     return DTOVectorSong.builder()
-                            .title(song)
+                            .title(song.getName())
                             .feelings(feelings)
                             .build();
                 }).toList();
     }
 
     @Override
-    public DTOSongFeelings searchByName(String name) {
+    public DTOSongFeelings searchByName(String name, String user) {
         Song searchSong = songService.getSongByName(name);
+        Users userDb = getUser(user);
         if(searchSong == null) {
             throw new SongException.SongNotFoundException(name);
         }
-        List<SongFeelings> songFeelings = songFeelingRepository.findBySong(searchSong);
+        List<SongFeelings> songFeelings = songFeelingRepository.findBySongAndUser(searchSong,userDb);
 
         return DTOSongFeelings.builder().name(searchSong.getName())
             .feelings(getFeelingsMap(songFeelings)).build();
@@ -96,9 +99,34 @@ public class FeelingsServiceImpl implements FeelingsService {
 
         return createCurrentFeeling(user);
     }
+    @Override
+    public List<DTOVectorSong> findMostSimilarSongs(String user) {
+
+        List<Double> userVector = getCurrentFeelingsByUser(user);
+
+        List<String> songsOmitted = redisService.getListOf(user,2);
+
+        List<Song> songsName = songFeelingRepository.findByUser(getUser(user))
+                .stream().map(SongFeelings::getSong)
+                .toList();
+
+        List<DTOVectorSong> allSongs = getFeelingsByUser(user,songsName);
+
+        // Comparator with reversed cosine similarity
+        Comparator<DTOVectorSong> similarityComparator = Comparator.comparingDouble(song ->
+                cosineSimilarity(userVector, normalizeList(song.getFeelings()))
+        );
+        return allSongs.stream()
+                .filter(song-> !song.getFeelings().isEmpty() && !songsOmitted.contains(song.getTitle()))
+                .sorted(similarityComparator.reversed())
+                .distinct()
+                .limit(3)
+                .toList();
+    }
 
     public List<Double> createCurrentFeeling(String user){
-        List<String> songs = redisService.getListOf(user,2);
+        List<String> songsName = redisService.getListOf(user,2);
+        List<Song> songs = songsName.stream().map(songService::getSongByName).toList();
         List<double[]> data = getFeelingsByUser(user,songs)
                 .stream()
                 .map(DTOVectorSong::getFeelings)
@@ -123,18 +151,16 @@ public class FeelingsServiceImpl implements FeelingsService {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    private DTOVectorSong findMostSimilarSong(List<Double> userVector, List<DTOVectorSong> allSongs, String name) {
-        return allSongs.stream()
-                .filter(song -> !song.getFeelings().isEmpty() && !song.getTitle().equals(name))
-                .max(Comparator.comparingDouble(song ->
-                        cosineSimilarity(userVector, song.getFeelings())))
-                .orElse(null);
-    }
 
     public static double[] normalize(double[] vector) {
         return Arrays.stream(vector)
                 .map(val -> val / 10.0)
                 .toArray();
+    }
+    public static List<Double> normalizeList(List<Double> vector) {
+        return  vector.stream()
+                .map(val -> val / 10.0)
+                .toList();
     }
     public static List<Double> average(List<double[]> vector) {
         int size = vector.getFirst().length;
@@ -159,6 +185,9 @@ public class FeelingsServiceImpl implements FeelingsService {
         }
         return data;
     }
+    private Users getUser(String name){
+        return userRepository.findByUsername(name).orElseThrow();
+    }
+
 }
 
- 
