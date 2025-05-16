@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.reproductor.music.dto.Convert.*;
+import static com.reproductor.music.utils.Convert.*;
 
 @Service
 @RequiredArgsConstructor

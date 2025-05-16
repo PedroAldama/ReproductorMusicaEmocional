@@ -11,4 +11,5 @@ import java.util.List;
 public class DTOVectorSong {
     private String title;
     private List<Double> feelings = new ArrayList<>();
+    private double similarity;
 }

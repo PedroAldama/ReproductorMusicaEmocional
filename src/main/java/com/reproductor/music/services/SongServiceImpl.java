@@ -2,7 +2,6 @@ package com.reproductor.music.services;
 
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
-import com.reproductor.music.entities.History;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.SongRepository;
@@ -18,8 +17,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 
-import static com.reproductor.music.dto.Convert.convertSongList;
-import static com.reproductor.music.dto.Convert.convertSongToDto;
+import static com.reproductor.music.utils.Convert.convertSongList;
+import static com.reproductor.music.utils.Convert.convertSongToDto;
 
 @Service
 @RequiredArgsConstructor

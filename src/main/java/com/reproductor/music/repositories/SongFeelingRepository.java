@@ -2,13 +2,17 @@ package com.reproductor.music.repositories;
 
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
-import com.reproductor.music.entities.Users;
+import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 public interface SongFeelingRepository extends CrudRepository<SongFeelings,Long> {
-    List<SongFeelings> findBySong(Song song);
-    List<SongFeelings> findBySongAndUser(Song song, Users user);
-    List<SongFeelings> findByUser(Users user);
+
+    @Query("SELECT sf.song from SongFeelings sf where sf.user.username = :user")
+    List<Song> findByUser_Username(@Param("user") String user);
+
+    @Query("Select sf from SongFeelings sf Where sf.user.username = :user and sf.song.name = :song")
+    List<SongFeelings> findByUser_UsernameAndSong_Name(@Param("song") String song,@Param("user") String user);
 }

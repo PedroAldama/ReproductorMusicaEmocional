@@ -15,8 +15,9 @@ public interface FeelingsService {
     void addFeelings(FeelingsRequest feelings,String user);
     void updateFeelings(FeelingsRequest feelings, String user);
     DTOVectorSong searchSongBySimilarFeelings(String name);
-    List<DTOVectorSong> getFeelingsByUser(String user, List<Song> song);
     DTOSongFeelings searchByName(String name, String user);
     List<Double> getCurrentFeelingsByUser(String user);
     List<DTOVectorSong> findMostSimilarSongs(String user);
+    List<Double> createCurrentFeeling(String user);
+    List<DTOSong> searchByUsername(String name);
 }

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.reproductor.music.dto.Convert.convertGroupDtoList;
+import static com.reproductor.music.utils.Convert.convertGroupDtoList;
 import java.util.ArrayList;
 import java.util.List;
 

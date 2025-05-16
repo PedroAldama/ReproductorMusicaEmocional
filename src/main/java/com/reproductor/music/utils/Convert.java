@@ -1,5 +1,6 @@
-package com.reproductor.music.dto;
+package com.reproductor.music.utils;
 
+import com.reproductor.music.dto.*;
 import com.reproductor.music.dto.request.DTOVectorSong;
 import com.reproductor.music.entities.*;
 

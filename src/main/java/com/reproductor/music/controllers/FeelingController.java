@@ -40,4 +40,8 @@ public class FeelingController {
         feelingsService.addFeelings(request,user);
         return  ResponseEntity.ok("Feelings added successfully to " + request.getSongName());
     }
+    @GetMapping("/songs/{user}")
+    public ResponseEntity<?> searchSongByUsername(@PathVariable String user){
+        return ResponseEntity.ok(feelingsService.searchByUsername(user));
+    }
 }

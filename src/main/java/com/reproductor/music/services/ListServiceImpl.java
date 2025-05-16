@@ -1,6 +1,6 @@
 package com.reproductor.music.services;
 
-import com.reproductor.music.dto.Convert;
+import com.reproductor.music.utils.Convert;
 import com.reproductor.music.dto.DTOLIST;
 import com.reproductor.music.dto.request.ListRequest;
 import com.reproductor.music.dto.request.RemoveSongRequest;
