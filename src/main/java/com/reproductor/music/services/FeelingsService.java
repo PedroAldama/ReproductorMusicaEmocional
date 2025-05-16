@@ -14,7 +14,7 @@ import java.util.List;
 public interface FeelingsService {
     void addFeelings(FeelingsRequest feelings,String user);
     void updateFeelings(FeelingsRequest feelings, String user);
-    DTOVectorSong searchSongBySimilarFeelings(String name);
+    List<DTOVectorSong> searchSongBySimilarFeelings(String song,String name);
     DTOSongFeelings searchByName(String name, String user);
     List<Double> getCurrentFeelingsByUser(String user);
     List<DTOVectorSong> findMostSimilarSongs(String user);

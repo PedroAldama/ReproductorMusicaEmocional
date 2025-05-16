@@ -24,20 +24,18 @@ import java.util.stream.Collectors;
 @Service
 public class FeelingsServiceImpl implements FeelingsService {
 
-    private final SongService songService;
     private final FeelingsRepository repository;
     private final SongFeelingRepository songFeelingRepository;
-    private final UserRepository userRepository;
     private final RedisServiceImp redisService;
     private final VectorUtils vectorUtils;
+    private final UserRepository userRepository;
+    private final SongService songService;
 
     @Override
     public void addFeelings(FeelingsRequest feelings, String user) {
         Song song = songService.getSongByName(feelings.getSongName());
         Users userDb = userRepository.findByUsername(user).orElseThrow();
-        if (song == null) {
-            throw new SongException.SongNotFoundException(feelings.getSongName());
-        }
+
         int i = 1;
         for(Double n: feelings.getFeelings()) {
              SongFeelings newSongFeeling = new SongFeelings();
@@ -55,13 +53,31 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
 
     @Override
-    public DTOVectorSong searchSongBySimilarFeelings(String name) {
-        return findMostSimilarSongs(name).stream().findFirst().orElseThrow();
+    public List<DTOVectorSong> searchSongBySimilarFeelings(String song, String user) {
+        String songName = songService.getSongByName(song).getName();
+
+        if(songName.isEmpty()) throw new SongException.SongNotFoundException(song);
+
+        List<Double> vector = vectorUtils.normalize(songFeelingRepository.findUserSongValues(songName,user));
+        if(vector.isEmpty()) {
+            return null;
+        }
+        List<String> songs = songFeelingRepository.getSongsNameByUser(user);
+        return getFeelingsForSongListSimilarity(user,songs,vector).stream()
+                .filter(s -> !s.getTitle().equals(songName))
+                .distinct()
+                .sorted(Comparator.comparingDouble(DTOVectorSong::getSimilarity)
+                        .reversed())
+                .toList();
     }
     @Override
     public DTOSongFeelings searchByName(String song, String user) {
-        List<SongFeelings> songFeelings = songFeelingRepository.findByUser_UsernameAndSong_Name(song,user);
-        return DTOSongFeelings.builder().name(song)
+        String songName = songService.getSongByName(song).getName();
+
+        if(songName.isEmpty()) throw new SongException.SongNotFoundException(song);
+
+        List<SongFeelings> songFeelings = songFeelingRepository.findByUser_UsernameAndSong_Name(songName,user);
+        return DTOSongFeelings.builder().name(songName)
                 .feelings(vectorUtils.getFeelingsMap(songFeelings)).build();
     }
     @Override
@@ -78,9 +94,10 @@ public class FeelingsServiceImpl implements FeelingsService {
     @Override
     public List<DTOVectorSong> findMostSimilarSongs(String user) {
         List<String> songsOmitted = redisService.getListOf(user);
-        List<String> songsName = songFeelingRepository.findByUser_Username(user).stream().map(Song::getName).toList();
+        List<String> songsName = songFeelingRepository.getSongsNameByUser(user);
+        List<Double> userVector = getCurrentFeelingsByUser(user);
 
-        List<DTOVectorSong> allSongs = getFeelingsForSongListSimilarity(user,songsName).stream()
+        List<DTOVectorSong> allSongs = getFeelingsForSongListSimilarity(user,songsName,userVector).stream()
                 .filter(Objects::nonNull)
                 .filter(dto -> !songsOmitted.contains(dto.getTitle()))
                 .toList();
@@ -102,13 +119,12 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
     @Override
     public List<DTOSong> searchByUsername(String name) {
-        return Convert.convertSongList(songFeelingRepository.findByUser_Username(name));
+        return Convert.convertSongList(songFeelingRepository.getSongsByUser(name));
     }
 
+    private List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames
+            , List<Double> userVector) {
 
-    private List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames) {
-
-        List<Double> userVector = getCurrentFeelingsByUser(username);
         List<DTOVectorSong> result = new ArrayList<>();
 
         for (String songName : songNames) {
@@ -135,13 +151,7 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
 
     private List<Double> getDoubles(String username, String songName) {
-        List<Double> songVector;
-        songVector = songFeelingRepository.findByUser_UsernameAndSong_Name(songName, username)
-                .stream()
-                .map(SongFeelings::getValue)
-                .toList();
-        songVector = vectorUtils.normalize(songVector);
-        return songVector;
+        return vectorUtils.normalize(songFeelingRepository.findUserSongValues(songName, username));
     }
 
 

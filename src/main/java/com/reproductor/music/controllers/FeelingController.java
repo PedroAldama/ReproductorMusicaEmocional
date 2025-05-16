@@ -17,6 +17,11 @@ public class FeelingController {
 
     private final FeelingsService feelingsService;
 
+    @GetMapping
+    public ResponseEntity<?> getSongFeelings(@RequestParam String name, @RequestParam String user) {
+        return ResponseEntity.ok(feelingsService.searchByName(name,user));
+    }
+
     @GetMapping("/test")
     public ResponseEntity<?> test(@RequestParam String user) {
         return ResponseEntity.ok(feelingsService.findMostSimilarSongs(user));
@@ -25,14 +30,11 @@ public class FeelingController {
     public ResponseEntity<?> avg(@RequestParam String user) {
         return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser(user));
     }
-    @GetMapping
-    public ResponseEntity<?> getSongFeelings(@RequestParam String name, @RequestParam String user) {
-        return ResponseEntity.ok(feelingsService.searchByName(name,user));
-    }
 
-    @PostMapping("/recommendation")
-    public DTOVectorSong getSimilarFeelings(@RequestParam String user) {
-        return feelingsService.searchSongBySimilarFeelings(user);
+
+    @GetMapping("/recommendation")
+    public List<?> getSimilarFeelings(@RequestParam String name, @RequestParam String song) {
+        return feelingsService.searchSongBySimilarFeelings(song,name);
     }
 
     @PostMapping("/add")
