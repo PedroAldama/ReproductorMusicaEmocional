@@ -26,10 +26,13 @@ public class VectorUtils {
                 .toList();
     }
     public  List<Double> average(List<List<Double>> vector) {
+        if(vector.isEmpty()) return List.of();
+
         int size = vector.getFirst().size();
         double[] avg = new double[size];
         List<Double> data = new ArrayList<>();
         for(List<Double> vec: vector){
+            if(vec.isEmpty()) continue;
             for(int i = 0; i < size; i++){
                 avg[i] += vec.get(i);
             }

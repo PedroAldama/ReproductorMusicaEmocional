@@ -2,7 +2,7 @@ package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.DTOGroup;
 import com.reproductor.music.dto.request.RequestGroup;
-import com.reproductor.music.services.GroupService;
+import com.reproductor.music.services.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

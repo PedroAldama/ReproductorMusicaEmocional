@@ -2,8 +2,8 @@ package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
-import com.reproductor.music.services.RedisServiceImp;
-import com.reproductor.music.services.SongService;
+import com.reproductor.music.services.redis.RedisServiceImp;
+import com.reproductor.music.services.song.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

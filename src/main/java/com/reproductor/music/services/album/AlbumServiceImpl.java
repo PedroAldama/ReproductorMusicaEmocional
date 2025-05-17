@@ -1,4 +1,4 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.album;
 
 import com.reproductor.music.dto.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
@@ -6,6 +6,8 @@ import com.reproductor.music.entities.Album;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.AlbumRepository;
+import com.reproductor.music.services.group.GroupService;
+import com.reproductor.music.services.song.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     private final AlbumRepository albumRepository;
     private final GroupService groupService;
-    private final  SongService songService;
+    private final SongService songService;
 
     @Override
     public List<DTOAlbum> getAllAlbums() {

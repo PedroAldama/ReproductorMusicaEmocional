@@ -2,7 +2,7 @@ package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
-import com.reproductor.music.services.AlbumService;
+import com.reproductor.music.services.album.AlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

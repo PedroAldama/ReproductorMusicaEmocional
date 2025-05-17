@@ -1,4 +1,4 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.list;
 
 import com.reproductor.music.dto.DTOLIST;
 import com.reproductor.music.dto.request.ListRequest;

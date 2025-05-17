@@ -1,15 +1,13 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +34,13 @@ public class RedisServiceImp {
         return redisTemplate.opsForValue().get(FEELING_KEY + user);
     }
     public void setCurrentFeeling(String user, List<Double> feeling){
-        redisTemplate.opsForValue().set(FEELING_KEY + user, feeling.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        redisTemplate.opsForValue().set(FEELING_KEY + user, feeling.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","))
+        , Duration.ofHours(1));
     }
     public void saveUserSongVectorToRedis(String key,String raw) {
-        redisTemplate.opsForValue().set(key, raw);
+        redisTemplate.opsForValue().set(key,raw,Duration.ofDays(1));
     }
 
     public List<Double> getUserSongVector(String username, String songName) {
@@ -54,8 +55,12 @@ public class RedisServiceImp {
         return List.of();
     }
 
-
-
-
+    public void setUserSongsVectorCurrentlyStorage(String user, String song){
+        String key = String.format("vector:%s",user);
+        redisTemplate.opsForList().leftPush(key, song);
+    }
+    public List<String> getUserSongsVectorCurrentlyStorage(String user){
+        return redisTemplate.opsForList().range(String.format("vector:%s",user), 0, -1);
+    }
 
 }

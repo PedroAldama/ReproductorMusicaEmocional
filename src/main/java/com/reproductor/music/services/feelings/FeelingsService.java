@@ -1,13 +1,9 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.feelings;
 
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.DTOSongFeelings;
 import com.reproductor.music.dto.request.DTOVectorSong;
 import com.reproductor.music.dto.request.FeelingsRequest;
-import com.reproductor.music.entities.Feelings;
-import com.reproductor.music.entities.Song;
-import com.reproductor.music.entities.SongFeelings;
-import com.reproductor.music.entities.Users;
 
 import java.util.List;
 

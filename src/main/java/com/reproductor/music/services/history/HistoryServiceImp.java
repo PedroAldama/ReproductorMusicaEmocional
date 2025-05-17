@@ -1,9 +1,11 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.history;
 
 import com.reproductor.music.entities.History;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
 import com.reproductor.music.repositories.HistoryRepository;
+import com.reproductor.music.services.redis.RedisServiceImp;
+import com.reproductor.music.services.song.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -50,21 +52,21 @@ public class HistoryServiceImp implements HistoryService {
                     .songs(redisService.getFullList(user))
                     .build();
                     historyRepository.save(history);
-        }else{
-            List<String> songs = Stream.concat(
-                    redisService.getFullList(user).stream(),
-                    searchHistory.getSongs().stream()
-            ).toList();
-            searchHistory.setSongs(songs);
-            historyRepository.save(searchHistory);
+        }else {
+            addToHistory(user,searchHistory);
         }
 
         redisService.clearList(user);
     }
 
     @Override
-    public void addToHistory(String user, Song song) {
-    //Return something
+    public void addToHistory(String user, History history) {
+        List<String> songs = Stream.concat(
+                redisService.getFullList(user).stream(),
+                history.getSongs().stream()
+        ).toList();
+        history.setSongs(songs);
+        historyRepository.save(history);
     }
 
     @Override
@@ -75,7 +77,13 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
-    public List<History> getAllHistory() {
-        return historyRepository.findAll();
+    public List<History> getAllHistory(String user) {
+        return historyRepository.findAllByUserOrderByCreationDesc(user);
+    }
+
+    @Override
+    public List<String> getSongsHistory(String user, Date date) {
+        History history = getHistory(user,date);
+        return  history != null ? history.getSongs() : List.of();
     }
 }

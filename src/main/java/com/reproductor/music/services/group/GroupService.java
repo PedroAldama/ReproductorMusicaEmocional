@@ -1,4 +1,4 @@
-package com.reproductor.music.services;
+package com.reproductor.music.services.group;
 import com.reproductor.music.dto.DTOGroup;
 import com.reproductor.music.dto.request.RequestGroup;
 import com.reproductor.music.entities.Group;

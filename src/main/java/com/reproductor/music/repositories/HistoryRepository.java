@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface HistoryRepository extends MongoRepository<History, String> {
     List<History> findByUserOrderByCreationDesc(String user);
+    List<History> findAllByUserOrderByCreationDesc(String user);
     Optional<History> findById(String id);
     List<History> findAll();
 }

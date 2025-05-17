@@ -1,7 +1,7 @@
 package com.reproductor.music.controllers;
 
 import com.reproductor.music.entities.History;
-import com.reproductor.music.services.HistoryService;
+import com.reproductor.music.services.history.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +16,8 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @GetMapping
-    public List<History> getAll(){
-        return historyService.getAllHistory();
+    public List<History> getAll(@RequestParam String user){
+        return historyService.getAllHistory(user);
     }
 
     @GetMapping("/user")

@@ -4,7 +4,7 @@ import com.reproductor.music.dto.DTOLIST;
 import com.reproductor.music.dto.request.ListRequest;
 import com.reproductor.music.dto.request.RemoveSongRequest;
 import com.reproductor.music.dto.request.SongToListRequest;
-import com.reproductor.music.services.ListService;
+import com.reproductor.music.services.list.ListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

@@ -1,9 +1,7 @@
 package com.reproductor.music.controllers;
 
-import com.reproductor.music.dto.request.DTOVectorSong;
 import com.reproductor.music.dto.request.FeelingsRequest;
-import com.reproductor.music.dto.request.TestSimilarity;
-import com.reproductor.music.services.FeelingsService;
+import com.reproductor.music.services.feelings.FeelingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
