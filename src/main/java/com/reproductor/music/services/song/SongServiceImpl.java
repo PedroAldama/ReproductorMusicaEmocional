@@ -5,6 +5,7 @@ import com.reproductor.music.dto.request.RequestSong;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.SongRepository;
+import com.reproductor.music.services.redis.RedisServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class SongServiceImpl implements SongService {
 
     private static final String BASE_FOLDER = "C:/Users/Pedro/Desktop/songs/MusicFile/";
     private final SongRepository songRepository;
+    private final RedisServiceImp redisService;
 
 
     @Override
@@ -40,9 +42,11 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public DTOSong getSongByNameResponse(String name) {
-        return convertSongToDto(songRepository.findByName(name)
+    public DTOSong getSongByNameResponse(String name, String user) {
+        DTOSong songResponse =  convertSongToDto(songRepository.findByName(name)
                 .orElseThrow(() -> new SongException.SongNotFoundException(name + " Not found")));
+        redisService.addSongToList(user,songResponse.getName());
+        return songResponse;
     }
 
     @Override
@@ -68,7 +72,7 @@ public class SongServiceImpl implements SongService {
                 .src("MusicFile/" + song + extension)
                 .build();
         songRepository.save(newSong);
-        return getSongByNameResponse(newSong.getName());
+        return convertSongToDto(newSong);
     }
 
     private static String getExtension(MultipartFile file, String originalFilename) {

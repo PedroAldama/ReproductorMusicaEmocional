@@ -11,7 +11,7 @@ import java.util.*;
 public interface SongService {
      List<DTOSong> getAllSongsResponse();
      Song getSongByName(String name);
-     DTOSong getSongByNameResponse(String name);
+     DTOSong getSongByNameResponse(String name,String user);
      DTOSong addSong(RequestSong song, MultipartFile file) throws IOException;
      void save(Song song);
      List<Song> findAllWithFeeling();
