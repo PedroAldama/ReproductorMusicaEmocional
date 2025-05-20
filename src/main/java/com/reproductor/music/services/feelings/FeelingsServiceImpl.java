@@ -6,7 +6,7 @@ import com.reproductor.music.dto.response.DTOVectorSong;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
 import com.reproductor.music.entities.Users;
-import com.reproductor.music.exceptions.SongException;
+import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.FeelingsRepository;
 import com.reproductor.music.dto.request.FeelingsRequest;
 import com.reproductor.music.repositories.SongFeelingRepository;
@@ -67,7 +67,7 @@ public class FeelingsServiceImpl implements FeelingsService {
         initial();
         String songName = songService.getSongByName(song).getName();
 
-        if(songName.isEmpty()) throw new SongException.SongNotFoundException(song);
+        if(songName.isEmpty()) throw new SongExceptions.SongNotFoundException(song);
 
         List<Double> vector = vectorUtils.normalize(songFeelingRepository.findUserSongValues(this.userName,songName));
         if(vector.isEmpty()) {
@@ -89,7 +89,7 @@ public class FeelingsServiceImpl implements FeelingsService {
         initial();
         String songName = songService.getSongByName(song).getName();
 
-        if(songName.isEmpty()) throw new SongException.SongNotFoundException(song);
+        if(songName.isEmpty()) throw new SongExceptions.SongNotFoundException(song);
 
         List<SongFeelings> songFeelings = songFeelingRepository.findByUser_UsernameAndSong_Name(songName,this.userName);
         return DTOSongFeelings.builder().name(songName)

@@ -1,9 +1,8 @@
 package com.reproductor.music.services.song;
 
 import com.reproductor.music.dto.response.DTOSong;
-import com.reproductor.music.dto.request.RequestSong;
 import com.reproductor.music.entities.Song;
-import com.reproductor.music.exceptions.SongException;
+import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.SongRepository;
 import com.reproductor.music.services.redis.RedisServiceImp;
 import com.reproductor.music.utils.UserUtils;
@@ -39,14 +38,14 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song getSongByName(String name) {
         return songRepository.findByName(name)
-                .orElseThrow(() -> new SongException.SongNotFoundException(name + " Not found"));
+                .orElseThrow(() -> new SongExceptions.SongNotFoundException(name + " Not found"));
     }
 
     @Override
     public DTOSong getSongByNameResponse(String name) {
         String user = userUtils.getCurrentUserName();
         DTOSong songResponse =  convertSongToDto(songRepository.findByName(name)
-                .orElseThrow(() -> new SongException.SongNotFoundException(name + " Not found")));
+                .orElseThrow(() -> new SongExceptions.SongNotFoundException(name + " Not found")));
         redisService.addSongToList(user,songResponse.getName());
         return songResponse;
     }

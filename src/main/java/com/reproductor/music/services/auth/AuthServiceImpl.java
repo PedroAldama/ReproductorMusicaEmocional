@@ -1,6 +1,6 @@
 package com.reproductor.music.services.auth;
 
-import com.reproductor.music.dto.security.DtoLogin;
+import com.reproductor.music.dto.security.DTOLogin;
 import com.reproductor.music.security.JwtTokenProvider;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +16,7 @@ public class AuthServiceImpl implements AuthService {
     private JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public String login(DtoLogin dtoLogin) {
+    public String login(DTOLogin dtoLogin) {
 
         //AuthenticationManager is used to authenticate the user
         Authentication authentication = authenticationManager.authenticate(

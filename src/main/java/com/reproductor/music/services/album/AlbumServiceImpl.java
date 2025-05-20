@@ -4,7 +4,7 @@ import com.reproductor.music.dto.response.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
 import com.reproductor.music.entities.Album;
 import com.reproductor.music.entities.Song;
-import com.reproductor.music.exceptions.SongException;
+import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.AlbumRepository;
 import com.reproductor.music.services.group.GroupService;
 import com.reproductor.music.services.song.SongService;
@@ -32,13 +32,13 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public Album getAlbumByTitle(String name) {
         return albumRepository.findByTitle(name)
-                .orElseThrow(() -> new SongException.AlbumNotFoundException(name));
+                .orElseThrow(() -> new SongExceptions.AlbumNotFoundException(name));
     }
 
     @Override
     public DTOAlbum getAlbumByTitleResponse(String name) {
         return convertAlbumToDto(albumRepository.findByTitle(name)
-                .orElseThrow(() -> new SongException.AlbumNotFoundException(name)));
+                .orElseThrow(() -> new SongExceptions.AlbumNotFoundException(name)));
     }
 
     @Override

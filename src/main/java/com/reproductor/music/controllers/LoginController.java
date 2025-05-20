@@ -1,6 +1,6 @@
 package com.reproductor.music.controllers;
 
-import com.reproductor.music.dto.security.DtoLogin;
+import com.reproductor.music.dto.security.DTOLogin;
 import com.reproductor.music.dto.security.JwtAuthResponse;
 import com.reproductor.music.services.auth.AuthService;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ public class LoginController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody DtoLogin loginRequest) {
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody DTOLogin loginRequest) {
         String token = authService.login(loginRequest);
         JwtAuthResponse response = JwtAuthResponse.builder()
                 .accessToken(token)

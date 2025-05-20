@@ -1,8 +1,11 @@
 package com.reproductor.music.exceptions;
 
-import java.io.IOException;
 
-public class SongException {
+public class SongExceptions {
+
+    private SongExceptions(){
+        //
+    }
 
     public static class SongNotFoundException extends RuntimeException {
         public SongNotFoundException(String message) {

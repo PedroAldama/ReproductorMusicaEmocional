@@ -1,9 +1,8 @@
 package com.reproductor.music.services.group;
 
 import com.reproductor.music.dto.response.DTOGroup;
-import com.reproductor.music.dto.request.RequestGroup;
 import com.reproductor.music.entities.Group;
-import com.reproductor.music.exceptions.SongException;
+import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.GroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class GroupServiceImpl implements GroupService{
     public Group findByName(String name) {
         return groupRepository
                 .findByName(name)
-                .orElseThrow(()->new SongException.ArtistNotFoundException(name + " not found"));
+                .orElseThrow(()->new SongExceptions.ArtistNotFoundException(name + " not found"));
     }
 
     @Override
