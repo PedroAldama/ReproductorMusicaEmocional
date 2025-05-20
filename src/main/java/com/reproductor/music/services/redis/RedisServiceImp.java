@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,10 +58,10 @@ public class RedisServiceImp {
 
     public void setUserSongsVectorCurrentlyStorage(String user, String song){
         String key = String.format("vector:%s",user);
-        redisTemplate.opsForList().leftPush(key, song);
+        redisTemplate.opsForSet().add(key, song);
     }
-    public List<String> getUserSongsVectorCurrentlyStorage(String user){
-        return redisTemplate.opsForList().range(String.format("vector:%s",user), 0, -1);
+    public Set<String> getUserSongsVectorCurrentlyStorage(String user){
+        return redisTemplate.opsForSet().members(String.format("vector:%s",user));
     }
 
 }

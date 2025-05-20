@@ -1,6 +1,6 @@
 package com.reproductor.music.controllers;
 
-import com.reproductor.music.dto.DTOAlbum;
+import com.reproductor.music.dto.response.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
 import com.reproductor.music.services.album.AlbumService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ public class AlbumController {
     public ResponseEntity<List<DTOAlbum>> getAll() {
         return ResponseEntity.ok(albumService.getAllAlbums());
     }
+
     @GetMapping("/name")
     public ResponseEntity<DTOAlbum> getByName(@RequestParam String name) {
         return ResponseEntity.ok(albumService.getAlbumByTitleResponse(name));

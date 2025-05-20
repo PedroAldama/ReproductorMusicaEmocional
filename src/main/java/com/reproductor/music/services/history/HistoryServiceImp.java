@@ -6,6 +6,7 @@ import com.reproductor.music.entities.SongFeelings;
 import com.reproductor.music.repositories.HistoryRepository;
 import com.reproductor.music.services.redis.RedisServiceImp;
 import com.reproductor.music.services.song.SongService;
+import com.reproductor.music.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +19,17 @@ import java.util.stream.Stream;
 public class HistoryServiceImp implements HistoryService {
 
     private final HistoryRepository historyRepository;
+    private final UserUtils userUtils;
     private final SongService songService;
     private final RedisServiceImp redisService;
 
-    @Override
-    public List<Song> recommendByEmotion(String user) {
-        List<History> histories = historyRepository.findByUserOrderByCreationDesc(user);
-        if (histories.isEmpty()) return new ArrayList<>();
+    private String userName;
 
+    @Override
+    public List<Song> recommendByEmotion() {
+        initial();
+        List<History> histories = historyRepository.findByUserOrderByCreationDesc(this.userName);
+        if (histories.isEmpty()) return new ArrayList<>();
         List<String> lastSongs = histories.getFirst().getSongs();
 
         Map<String, Integer> feelSum = new HashMap<>();
@@ -43,7 +47,8 @@ public class HistoryServiceImp implements HistoryService {
 
     @Override
     public void createHistory(String user) {
-        History searchHistory = getHistory(user, new Date());
+        initial();
+        History searchHistory = getHistory(new Date());
         if(searchHistory == null) {
             History history = History.builder()
                     .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
@@ -53,16 +58,17 @@ public class HistoryServiceImp implements HistoryService {
                     .build();
                     historyRepository.save(history);
         }else {
-            addToHistory(user,searchHistory);
+            addToHistory(searchHistory);
         }
 
         redisService.clearList(user);
     }
 
     @Override
-    public void addToHistory(String user, History history) {
+    public void addToHistory(History history) {
+        initial();
         List<String> songs = Stream.concat(
-                redisService.getFullList(user).stream(),
+                redisService.getFullList(this.userName).stream(),
                 history.getSongs().stream()
         ).toList();
         history.setSongs(songs);
@@ -70,20 +76,28 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
-    public History getHistory(String user, Date date) {
+    public History getHistory(Date date) {
+        initial();
         return historyRepository
-                .findById(new SimpleDateFormat("dd-MM-yyyy").format(date) + user)
+                .findById(new SimpleDateFormat("dd-MM-yyyy").format(date) + this.userName)
                 .orElse(null);
     }
 
     @Override
-    public List<History> getAllHistory(String user) {
+    public List<History> getAllHistory() {
+        initial();
+        String user = userUtils.getCurrentUserName();
         return historyRepository.findAllByUserOrderByCreationDesc(user);
     }
 
     @Override
-    public List<String> getSongsHistory(String user, Date date) {
-        History history = getHistory(user,date);
+    public List<String> getSongsHistory( Date date) {
+        History history = getHistory(date);
         return  history != null ? history.getSongs() : List.of();
+    }
+    private void initial(){
+        if (this.userName == null){
+            this.userName = userUtils.getCurrentUserName();
+        }
     }
 }

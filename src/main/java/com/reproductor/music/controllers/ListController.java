@@ -1,7 +1,6 @@
 package com.reproductor.music.controllers;
 
-import com.reproductor.music.dto.DTOLIST;
-import com.reproductor.music.dto.request.ListRequest;
+import com.reproductor.music.dto.response.DTOLIST;
 import com.reproductor.music.dto.request.RemoveSongRequest;
 import com.reproductor.music.dto.request.SongToListRequest;
 import com.reproductor.music.services.list.ListService;
@@ -31,8 +30,8 @@ public class ListController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<DTOLIST> create(@RequestBody ListRequest list) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(listService.createList(list));
+    public ResponseEntity<DTOLIST> create(@RequestParam String listName) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(listService.createList(listName));
     }
 
     @PostMapping("/addToList")

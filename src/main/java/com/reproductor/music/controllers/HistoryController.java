@@ -4,6 +4,7 @@ import com.reproductor.music.entities.History;
 import com.reproductor.music.services.history.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -16,17 +17,17 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @GetMapping
-    public List<History> getAll(@RequestParam String user){
-        return historyService.getAllHistory(user);
+    public List<History> getAll(){
+        return historyService.getAllHistory();
     }
 
     @GetMapping("/user")
-    public History getUserHistory(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date date, @RequestParam String user){
-        return historyService.getHistory(user,date);
+    public History getUserHistory(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date date){
+        return historyService.getHistory(date);
     }
 
     @PostMapping("/add")
-    public void addHistory(@RequestParam String name){
-         historyService.createHistory(name);
+    public void addHistory(){
+        historyService.createHistory("Hikari");
     }
 }

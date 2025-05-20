@@ -1,4 +1,4 @@
-package com.reproductor.music.entities;
+package com.reproductor.music.entities.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

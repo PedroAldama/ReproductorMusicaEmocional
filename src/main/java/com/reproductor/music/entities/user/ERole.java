@@ -1,4 +1,4 @@
-package com.reproductor.music.entities;
+package com.reproductor.music.entities.user;
 
 public enum ERole {
     ROLE_USER,

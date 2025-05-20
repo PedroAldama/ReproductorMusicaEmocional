@@ -1,5 +1,6 @@
 package com.reproductor.music.entities;
 
+import com.reproductor.music.entities.user.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

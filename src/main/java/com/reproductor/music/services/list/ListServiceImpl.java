@@ -2,13 +2,13 @@ package com.reproductor.music.services.list;
 
 import com.reproductor.music.services.song.SongService;
 import com.reproductor.music.utils.Convert;
-import com.reproductor.music.dto.DTOLIST;
-import com.reproductor.music.dto.request.ListRequest;
+import com.reproductor.music.dto.response.DTOLIST;
 import com.reproductor.music.dto.request.RemoveSongRequest;
 import com.reproductor.music.dto.request.SongToListRequest;
 import com.reproductor.music.entities.Lista;
 import com.reproductor.music.exceptions.ListException;
 import com.reproductor.music.repositories.ListRepository;
+import com.reproductor.music.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +23,16 @@ public class ListServiceImpl implements ListService {
 
     private final ListRepository listRepo;
     private final SongService songService;
+    private final UserUtils userUtils;
+    private String username;
 
     @Override
     @Transactional
-    public DTOLIST createList(ListRequest list) {
+    public DTOLIST createList(String listName) {
+        initial();
         Lista lista = Lista.builder()
-                .name(list.getName())
-                .user(list.getUsername())
+                .name(listName)
+                .user(this.username)
                 .creation(new Date())
                 .lastModification(new Date())
                 .songs(new ArrayList<>())
@@ -43,12 +46,15 @@ public class ListServiceImpl implements ListService {
     public DTOLIST getListByName(String name) {
         return Convert.convertListToDTO(getList(name));
     }
-
+    @Override
+    public DTOLIST getListById(String  id) {
+        return Convert.convertListToDTO(listRepo.findById(id).orElseThrow(
+                ()-> new ListException.ListNotFoundException(id + " List not found ")));
+    }
     @Override
     public List<DTOLIST> getListByDate(Date start, Date end) {
         return Convert.convertListDtoList(listRepo.findByCreationBetween(start, end));
     }
-
     @Override
     public String addToList(SongToListRequest request) {
         List<String> song = request.getSong().stream().map(s->songService.getSongByName(s).getName()).toList();
@@ -88,6 +94,11 @@ public class ListServiceImpl implements ListService {
 
     private Lista getList(String name) {
         return listRepo.findByName(name).orElseThrow(()-> new ListException.ListNotFoundException(name + " List not found "));
+    }
+    private void initial(){
+        if (this.username == null){
+            this.username = userUtils.getCurrentUserName();
+        }
     }
 
 }

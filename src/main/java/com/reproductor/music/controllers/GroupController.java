@@ -1,6 +1,6 @@
 package com.reproductor.music.controllers;
 
-import com.reproductor.music.dto.DTOGroup;
+import com.reproductor.music.dto.response.DTOGroup;
 import com.reproductor.music.dto.request.RequestGroup;
 import com.reproductor.music.services.group.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping("/register")
-    public ResponseEntity<RequestGroup> registerGroup(@RequestBody RequestGroup group) {
+    public ResponseEntity<String> registerGroup(@RequestParam String group) {
         groupService.save(group);
         return ResponseEntity.status(HttpStatus.CREATED).body(group);
     }

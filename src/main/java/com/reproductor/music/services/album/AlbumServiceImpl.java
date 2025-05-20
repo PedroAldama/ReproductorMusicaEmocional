@@ -1,6 +1,6 @@
 package com.reproductor.music.services.album;
 
-import com.reproductor.music.dto.DTOAlbum;
+import com.reproductor.music.dto.response.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
 import com.reproductor.music.entities.Album;
 import com.reproductor.music.entities.Song;

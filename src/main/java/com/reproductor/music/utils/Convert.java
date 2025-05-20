@@ -1,7 +1,7 @@
 package com.reproductor.music.utils;
 
-import com.reproductor.music.dto.*;
-import com.reproductor.music.dto.request.DTOVectorSong;
+import com.reproductor.music.dto.response.DTOVectorSong;
+import com.reproductor.music.dto.response.*;
 import com.reproductor.music.entities.*;
 
 import java.text.SimpleDateFormat;

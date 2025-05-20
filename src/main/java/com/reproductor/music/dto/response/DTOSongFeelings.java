@@ -1,10 +1,8 @@
-package com.reproductor.music.dto;
+package com.reproductor.music.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Builder

@@ -1,4 +1,4 @@
-package com.reproductor.music.dto.request;
+package com.reproductor.music.dto.response;
 
 import lombok.Builder;
 import lombok.Data;

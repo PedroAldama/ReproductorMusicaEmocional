@@ -3,7 +3,6 @@ package com.reproductor.music.security;
 import com.reproductor.music.entities.Users;
 import com.reproductor.music.repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

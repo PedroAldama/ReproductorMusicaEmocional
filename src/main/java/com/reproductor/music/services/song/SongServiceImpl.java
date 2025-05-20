@@ -1,11 +1,12 @@
 package com.reproductor.music.services.song;
 
-import com.reproductor.music.dto.DTOSong;
+import com.reproductor.music.dto.response.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongException;
 import com.reproductor.music.repositories.SongRepository;
 import com.reproductor.music.services.redis.RedisServiceImp;
+import com.reproductor.music.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class SongServiceImpl implements SongService {
     private static final String BASE_FOLDER = "C:/Users/Pedro/Desktop/songs/MusicFile/";
     private final SongRepository songRepository;
     private final RedisServiceImp redisService;
-
+    private final UserUtils userUtils;
 
     @Override
     public List<DTOSong> getAllSongsResponse() {
@@ -42,7 +43,8 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public DTOSong getSongByNameResponse(String name, String user) {
+    public DTOSong getSongByNameResponse(String name) {
+        String user = userUtils.getCurrentUserName();
         DTOSong songResponse =  convertSongToDto(songRepository.findByName(name)
                 .orElseThrow(() -> new SongException.SongNotFoundException(name + " Not found")));
         redisService.addSongToList(user,songResponse.getName());
@@ -51,7 +53,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional
-    public DTOSong addSong(RequestSong song, MultipartFile file) throws IOException {
+    public DTOSong addSong(String song,double duration, MultipartFile file) throws IOException {
 
         File directory = new File(BASE_FOLDER);
         if (!directory.exists()) {
@@ -67,8 +69,8 @@ public class SongServiceImpl implements SongService {
         file.transferTo(path.toFile());
 
         Song newSong = Song.builder()
-                .name(song.getTitle())
-                .duration(song.getDuration())
+                .name(song)
+                .duration(duration)
                 .src("MusicFile/" + song + extension)
                 .build();
         songRepository.save(newSong);

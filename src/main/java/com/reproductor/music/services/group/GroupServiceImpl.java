@@ -1,6 +1,6 @@
 package com.reproductor.music.services.group;
 
-import com.reproductor.music.dto.DTOGroup;
+import com.reproductor.music.dto.response.DTOGroup;
 import com.reproductor.music.dto.request.RequestGroup;
 import com.reproductor.music.entities.Group;
 import com.reproductor.music.exceptions.SongException;
@@ -33,8 +33,8 @@ public class GroupServiceImpl implements GroupService{
 
     @Override
     @Transactional
-    public void save(RequestGroup group) {
-        Group newGroup = Group.builder().name(group.getName()).album(new ArrayList<>()).build();
+    public void save(String group) {
+        Group newGroup = Group.builder().name(group).album(new ArrayList<>()).build();
         groupRepository.save(newGroup);
     }
 
