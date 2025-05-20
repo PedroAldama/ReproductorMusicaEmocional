@@ -3,6 +3,7 @@ package com.reproductor.music.controllers;
 import com.reproductor.music.dto.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
 import com.reproductor.music.entities.ERole;
+import com.reproductor.music.entities.Song;
 import com.reproductor.music.services.redis.RedisServiceImp;
 import com.reproductor.music.services.song.SongService;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,12 @@ public class SongController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DTOSong>addSong( @RequestParam("file") MultipartFile file, @RequestBody RequestSong song) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(songService.addSong(song,file));
+    }
+    @GetMapping("/get")
+    public ResponseEntity<Song>getSong(@RequestParam String songName){
+        return ResponseEntity.ok(songService.getSongByName(songName));
     }
 }

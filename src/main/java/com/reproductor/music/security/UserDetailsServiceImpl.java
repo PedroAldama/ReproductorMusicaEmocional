@@ -27,7 +27,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Set<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toSet());
-        System.out.println(user.getUsername() + " " + user.getPassword());
         return new User(user.getUsername(), user.getPassword(), grantedAuthorities);
     }
 }
