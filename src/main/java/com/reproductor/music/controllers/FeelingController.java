@@ -1,6 +1,9 @@
 package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.request.FeelingsRequest;
+import com.reproductor.music.dto.response.DTOSong;
+import com.reproductor.music.dto.response.DTOSongFeelings;
+import com.reproductor.music.dto.response.DTOVectorSong;
 import com.reproductor.music.services.feelings.FeelingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,32 +19,32 @@ public class FeelingController {
     private final FeelingsService feelingsService;
 
     @GetMapping
-    public ResponseEntity<?> getSongFeelings(@RequestParam String song) {
+    public ResponseEntity<DTOSongFeelings> getSongFeelings(@RequestParam String song) {
         return ResponseEntity.ok(feelingsService.searchByName(song));
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
+    @GetMapping("/similarSongs")
+    public ResponseEntity<List<DTOVectorSong>> test() {
         return ResponseEntity.ok(feelingsService.findMostSimilarSongs());
     }
-    @GetMapping("/avg")
-    public ResponseEntity<?> avg() {
+    @GetMapping("/currentValues")
+    public ResponseEntity<List<Double>> avg() {
         return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser());
     }
 
 
     @GetMapping("/recommendation")
-    public List<?> getSimilarFeelings(@RequestParam String song) {
-        return feelingsService.searchSongBySimilarFeelings(song);
+    public ResponseEntity<List<DTOVectorSong>> getSimilarFeelings(@RequestParam String song) {
+        return ResponseEntity.ok().body(feelingsService.searchSongBySimilarFeelings(song));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addSongFeeling(@RequestBody FeelingsRequest request) {
+    public ResponseEntity<String> addSongFeeling(@RequestBody FeelingsRequest request) {
         feelingsService.addFeelings(request);
         return  ResponseEntity.ok("Feelings added successfully to " + request.getSongName());
     }
     @GetMapping("/songs")
-    public ResponseEntity<?> searchSongByUsername(){
+    public ResponseEntity<List<DTOSong>> searchSongByUsername(){
         return ResponseEntity.ok(feelingsService.searchByUsername());
     }
 }
