@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 
 import static com.reproductor.music.utils.Convert.convertSongList;
@@ -103,8 +104,8 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public List<Song> findAllWithFeeling() {
-        return songRepository.findAllWithFeelings();
+    public Set<String> findAllSrc() {
+        return songRepository.findAllSrc();
     }
 
 

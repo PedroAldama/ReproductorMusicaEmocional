@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.reproductor.music.utils.Convert.convertGroupDtoList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,16 @@ public class GroupServiceImpl implements GroupService{
     public void save(String group) {
         Group newGroup = Group.builder().name(group).album(new ArrayList<>()).build();
         groupRepository.save(newGroup);
+    }
+
+    @Override
+    public Set<String> getAllGroups() {
+        return groupRepository.findAllNames();
+    }
+
+    @Override
+    public Optional<Group> searchByName(String name) {
+        return groupRepository.findByName(name);
     }
 
 }
