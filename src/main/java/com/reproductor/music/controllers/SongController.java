@@ -4,6 +4,8 @@ import com.reproductor.music.dto.response.DTOSong;
 import com.reproductor.music.dto.request.RequestSong;
 import com.reproductor.music.security.JwtTokenProvider;
 import com.reproductor.music.services.song.SongService;
+import com.reproductor.music.services.spotify.SpotifyService;
+import io.lettuce.core.dynamic.annotation.Param;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/song")
 @RestController
@@ -20,7 +23,7 @@ import java.util.List;
 public class SongController {
 
     private final SongService songService;
-    private final JwtTokenProvider tokenProvider;
+    private final SpotifyService spotifyService;
 
     @GetMapping
     public ResponseEntity<List<DTOSong>> getAllSongs() {
@@ -38,5 +41,10 @@ public class SongController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DTOSong>addSong( @RequestParam("file") MultipartFile file, @RequestParam String song, @RequestParam double duration) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(songService.addSong(song,duration,file));
+    }
+
+    @PostMapping("/spotify")
+    public ResponseEntity<List<DTOSong>> getSpotifySongs(@RequestParam String list) {
+        return ResponseEntity.ok().body(spotifyService.searchAndSaveSongs(list));
     }
 }

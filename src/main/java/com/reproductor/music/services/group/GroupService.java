@@ -8,4 +8,6 @@ public interface GroupService {
      List<DTOGroup> findAll();
      Group findByName(String name);
      void save(String group);
+     Set<String> getAllGroups();
+     Optional<Group> searchByName(String name);
 }

@@ -3,6 +3,7 @@ package com.reproductor.music.services.album;
 import com.reproductor.music.dto.response.DTOAlbum;
 import com.reproductor.music.dto.request.RequestAlbum;
 import com.reproductor.music.entities.Album;
+import com.reproductor.music.entities.Group;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.AlbumRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.reproductor.music.utils.Convert.*;
 
@@ -92,4 +94,16 @@ public class AlbumServiceImpl implements AlbumService {
 
         return getAlbumByTitleResponse(albumName);
     }
+
+    @Override
+    public List<Object[]> findAllAlbumGroupPairs() {
+        return albumRepository.findAllTitleGroupPairs();
+    }
+
+    @Override
+    public Optional<Album> searchAlbumByName(String name) {
+        return albumRepository.findByTitle(name);
+    }
+
+
 }
