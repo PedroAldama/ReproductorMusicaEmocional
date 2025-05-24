@@ -108,5 +108,14 @@ public class SongServiceImpl implements SongService {
         return songRepository.findAllSrc();
     }
 
+    @Override
+    public String getSrc(String songName) {
+        String src = songRepository.findSrcByName(songName);
+        if(src.split(":track:").length > 1)
+            return src.split(":track:")[1];
+
+        return src;
+    }
+
 
 }

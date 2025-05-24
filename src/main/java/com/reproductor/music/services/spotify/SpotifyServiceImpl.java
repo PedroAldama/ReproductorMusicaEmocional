@@ -43,7 +43,10 @@ public class SpotifyServiceImpl implements SpotifyService {
     @Override
     public List<DTOSong> searchAndSaveSongs(String playlistId) {
         String accessToken = getAccessToken();
-        String url = "https://api.spotify.com/v1/playlists/"+ playlistId + "/tracks?fields=items(track(name,uri,duration_ms,album(name,release_date),artists(name)))" ;
+        String url = "https://api.spotify.com/v1/playlists/"
+                + playlistId
+                + "/tracks?fields=items(track(name,uri,duration_ms,album(name,release_date),artists(name)))"
+                + "&limit=100&offset=250";
 
         Map response = webClient.get()
                 .uri(url)

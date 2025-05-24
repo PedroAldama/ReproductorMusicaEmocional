@@ -16,4 +16,6 @@ public interface FeelingsService {
     List<DTOVectorSong> findMostSimilarSongs();
     List<Double> createCurrentFeeling();
     List<DTOSong> searchByUsername();
+    DTOSong recommendationWebSocket();
+    void setUser(String user);
 }

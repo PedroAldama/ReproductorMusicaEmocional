@@ -155,6 +155,18 @@ public class FeelingsServiceImpl implements FeelingsService {
         return Convert.convertSongList(songFeelingRepository.getSongsByUser(this.userName));
     }
 
+    @Override
+    public DTOSong recommendationWebSocket() {
+        DTOVectorSong song = findMostSimilarSongs().stream().findFirst().get();
+        UpdateUserFeelings(song);
+        return DTOSong.builder().name(song.getTitle()).src(songService.getSrc(song.getTitle())).build();
+    }
+
+    @Override
+    public void setUser(String user) {
+        this.userName = user;
+    }
+
     private List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames
             , List<Double> userVector) {
 
@@ -201,6 +213,14 @@ public class FeelingsServiceImpl implements FeelingsService {
         if (this.userName == null){
             this.userName = userUtils.getCurrentUserName();
         }
+    }
+
+    private void UpdateUserFeelings(DTOVectorSong song){
+        //When a song is recommended, update the feeling vector to send new songs
+        List<Double> newFeelings = vectorUtils.average(
+                List.of(getCurrentFeelingsByUser(),song.getFeelings()));
+        redisService.addSongToList(this.userName, song.getTitle());
+        redisService.setCurrentFeeling(this.userName,newFeelings);
     }
 }
 
