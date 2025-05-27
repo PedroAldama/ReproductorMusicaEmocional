@@ -25,7 +25,7 @@ public class Song {
 
     private double duration;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "album_id")
     @JsonBackReference
     private Album album;

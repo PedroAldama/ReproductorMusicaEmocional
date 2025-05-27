@@ -22,7 +22,7 @@ public class Group {
 
     private String name;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Album> album = new ArrayList<>();
 

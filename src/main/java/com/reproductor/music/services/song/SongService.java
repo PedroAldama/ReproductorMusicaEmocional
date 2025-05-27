@@ -16,4 +16,5 @@ public interface SongService {
      void save(Song song);
      Set<String> findAllSrc();
      String getSrc(String songName);
+     String getOnlyName(String songName);
 }

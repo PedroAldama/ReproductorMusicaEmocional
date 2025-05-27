@@ -21,7 +21,7 @@ public class Feelings {
     private int id;
     private String feeling;
 
-    @OneToMany(mappedBy = "feeling", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "feeling", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SongFeelings> songFeelings = new ArrayList<>();
 
 }

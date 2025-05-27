@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface FeelingsRepository extends CrudRepository<Feelings, Long> {
     Optional<Feelings> findById(long id);
+    List<Feelings> findAll();
 }

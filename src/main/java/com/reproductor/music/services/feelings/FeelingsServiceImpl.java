@@ -3,6 +3,7 @@ package com.reproductor.music.services.feelings;
 import com.reproductor.music.dto.response.DTOSong;
 import com.reproductor.music.dto.response.DTOSongFeelings;
 import com.reproductor.music.dto.response.DTOVectorSong;
+import com.reproductor.music.entities.Feelings;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.entities.SongFeelings;
 import com.reproductor.music.entities.Users;
@@ -45,13 +46,12 @@ public class FeelingsServiceImpl implements FeelingsService {
         initial();
         Song song = songService.getSongByName(feelings.getSongName());
         Users userDb = userRepository.findByUsername(this.userName).orElseThrow();
-
-        int i = 1;
-        for(Double n: feelings.getFeelings()) {
+        List<Feelings> feelingList = getAllFeelings();
+        for(int i =0; i < feelings.getFeelings().size(); i++) {
              SongFeelings newSongFeeling = new SongFeelings();
              newSongFeeling.setSong(song);
-             newSongFeeling.setFeeling(feelingsRepository.findById(i++).orElseThrow());
-             newSongFeeling.setValue(n);
+             newSongFeeling.setFeeling(feelingList.get(i));
+             newSongFeeling.setValue(feelings.getFeelings().get(i));
              newSongFeeling.setUser(userDb);
              songFeelingRepository.save(newSongFeeling);
         }
@@ -65,7 +65,7 @@ public class FeelingsServiceImpl implements FeelingsService {
     @Override
     public List<DTOVectorSong> searchSongBySimilarFeelings(String song) {
         initial();
-        String songName = songService.getSongByName(song).getName();
+        String songName = songService.getOnlyName(song);
 
         if(songName.isEmpty()) throw new SongExceptions.SongNotFoundException(song);
 
@@ -221,6 +221,10 @@ public class FeelingsServiceImpl implements FeelingsService {
                 List.of(getCurrentFeelingsByUser(),song.getFeelings()));
         redisService.addSongToList(this.userName, song.getTitle());
         redisService.setCurrentFeeling(this.userName,newFeelings);
+    }
+
+    private List<Feelings> getAllFeelings(){
+        return feelingsRepository.findAll();
     }
 }
 

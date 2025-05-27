@@ -117,5 +117,10 @@ public class SongServiceImpl implements SongService {
         return src;
     }
 
+    @Override
+    public String getOnlyName(String songName) {
+        return songRepository.findOnlyName(songName);
+    }
+
 
 }

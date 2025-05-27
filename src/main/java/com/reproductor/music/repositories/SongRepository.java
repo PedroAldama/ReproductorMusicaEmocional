@@ -20,4 +20,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     Set<String> findAllSrc();
     @Query("Select s.src from Song s where s.name = :songName")
     String findSrcByName(String songName);
+    @Query("select s.name from Song s where s.name =:songName")
+    String findOnlyName(String songName);
 }

@@ -27,7 +27,7 @@ public class Album {
     private List<Song> songs = new ArrayList<>();
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     @JsonBackReference
     private Group group;
