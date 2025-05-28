@@ -42,10 +42,9 @@ public class FeelingsServiceImpl implements FeelingsService {
     private final UserRepository userRepository;
     private final SongService songService;
     private final HistoryService historyService;
-    private final UserUtils userUtils;
-    private  String  userName;
     private final EntityManager entityManager;
 
+    private  String  userName;
     @Override
     @Transactional
     public void addFeelings(List<FeelingsRequest> feelings) {
@@ -97,7 +96,6 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .toList();
     }
     @Override
-    @Transactional(readOnly = true)
     public DTOSongFeelings searchByName(String song) {
         userName = (userName == null) ? getCurrentUserName() : userName;
         String songName = songService.getOnlyName(song);
@@ -109,7 +107,6 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .feelings(vectorUtils.getFeelingsMap(songFeelings)).build();
     }
     @Override
-    @Transactional(readOnly = true)
     public List<Double> getCurrentFeelingsByUser() {
         userName = (userName == null) ? getCurrentUserName() : userName;
         String feelings = redisService.getCurrentFeeling(this.userName);
@@ -143,7 +140,6 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .toList();
     }
     @Override
-    @Transactional
     public List<Double> createCurrentFeeling(){
         userName = (userName == null) ? getCurrentUserName() : userName;
         //Get the last 3 songs played by user storage in redis
@@ -184,7 +180,6 @@ public class FeelingsServiceImpl implements FeelingsService {
         this.userName = user;
     }
 
-    @Transactional
     public List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames
             , List<Double> userVector) {
 
@@ -214,12 +209,11 @@ public class FeelingsServiceImpl implements FeelingsService {
         return result;
     }
 
-    @Transactional(readOnly = true)
+
     public List<Double> getDoubles(String username, String songName) {
         return songFeelingRepository.findUserSongValues(username, songName);
     }
 
-    @Transactional(readOnly = true)
     public List<String> getSongByUser(String user){
         List<String> songsName = redisService.getUserSongsVectorCurrentlyStorage(user).stream().map(String::valueOf).toList();
         //verify if the songs on
@@ -229,7 +223,7 @@ public class FeelingsServiceImpl implements FeelingsService {
         }
         return  songsName;
     }
-    @Transactional
+
     public void updateUserFeelings(DTOVectorSong song){
         //When a song is recommended, update the feeling vector to send new songs
         List<Double> newFeelings = vectorUtils.average(
@@ -237,7 +231,7 @@ public class FeelingsServiceImpl implements FeelingsService {
         redisService.addSongToList(this.userName, song.getTitle());
         redisService.setCurrentFeeling(this.userName,newFeelings);
     }
-    @Transactional(readOnly = true)
+
     public List<Feelings> getAllFeelings(){
         //Getting from Redis or Mysql
         return feelingsRepository.findAll();
