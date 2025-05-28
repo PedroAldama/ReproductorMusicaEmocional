@@ -8,7 +8,7 @@ import com.reproductor.music.dto.request.FeelingsRequest;
 import java.util.List;
 
 public interface FeelingsService {
-    void addFeelings(FeelingsRequest feelings);
+    void addFeelings(List<FeelingsRequest> feelings);
     void updateFeelings(FeelingsRequest feelings);
     List<DTOVectorSong> searchSongBySimilarFeelings(String song);
     DTOSongFeelings searchByName(String name);

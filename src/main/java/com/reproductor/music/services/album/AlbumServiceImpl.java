@@ -80,6 +80,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
+    @Transactional
     public DTOAlbum addSongsToAlbum(String albumName, List<String> songs) {
         Album album = getAlbumByTitle(albumName);
         List<Song> songList =  songs.stream().map(songService::getSongByName).toList();
@@ -96,11 +97,13 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Object[]> findAllAlbumGroupPairs() {
         return albumRepository.findAllTitleGroupPairs();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Album> searchAlbumByName(String name) {
         return albumRepository.findByTitle(name);
     }

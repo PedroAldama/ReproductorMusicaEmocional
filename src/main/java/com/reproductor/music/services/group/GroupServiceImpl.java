@@ -21,11 +21,13 @@ public class GroupServiceImpl implements GroupService{
     private final GroupRepository groupRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<DTOGroup> findAll() {
         return convertGroupDtoList(groupRepository.findAll());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Group findByName(String name) {
         return groupRepository
                 .findByName(name)
@@ -40,11 +42,13 @@ public class GroupServiceImpl implements GroupService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Set<String> getAllGroups() {
         return groupRepository.findAllNames();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Group> searchByName(String name) {
         return groupRepository.findByName(name);
     }

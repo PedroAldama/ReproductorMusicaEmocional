@@ -43,7 +43,6 @@ public class RedisServiceImp {
     public void saveUserSongVectorToRedis(String key,String raw) {
         redisTemplate.opsForValue().set(key,raw,Duration.ofDays(1));
     }
-
     public List<Double> getUserSongVector(String username, String songName) {
         String key = String.format("feelings:%s:%s", username, songName);
         String raw = redisTemplate.opsForValue().get(key);
@@ -55,7 +54,6 @@ public class RedisServiceImp {
         }
         return List.of();
     }
-
     public void setUserSongsVectorCurrentlyStorage(String user, String song){
         String key = String.format("vector:%s",user);
         redisTemplate.opsForSet().add(key, song);
@@ -63,5 +61,6 @@ public class RedisServiceImp {
     public Set<String> getUserSongsVectorCurrentlyStorage(String user){
         return redisTemplate.opsForSet().members(String.format("vector:%s",user));
     }
+
 
 }

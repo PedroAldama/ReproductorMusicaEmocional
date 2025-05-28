@@ -32,17 +32,20 @@ public class SongServiceImpl implements SongService {
     private final UserUtils userUtils;
 
     @Override
+    @Transactional(readOnly = true)
     public List<DTOSong> getAllSongsResponse() {
         return convertSongList(songRepository.findAll());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Song getSongByName(String name) {
         return songRepository.findByName(name)
                 .orElseThrow(() -> new SongExceptions.SongNotFoundException(name + " Not found"));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DTOSong getSongByNameResponse(String name) {
         String user = userUtils.getCurrentUserName();
         DTOSong songResponse =  convertSongToDto(songRepository.findByName(name)
@@ -104,11 +107,13 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Set<String> findAllSrc() {
         return songRepository.findAllSrc();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getSrc(String songName) {
         String src = songRepository.findSrcByName(songName);
         if(src.split(":track:").length > 1)
@@ -118,8 +123,15 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getOnlyName(String songName) {
         return songRepository.findOnlyName(songName);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int findIdBySongName(String songName) {
+        return songRepository.findIdByName(songName).orElseThrow(()-> new RuntimeException("Song not found " + songName));
     }
 
 

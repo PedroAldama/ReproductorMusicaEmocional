@@ -4,6 +4,7 @@ import com.reproductor.music.entities.Album;
 import com.reproductor.music.entities.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     String findSrcByName(String songName);
     @Query("select s.name from Song s where s.name =:songName")
     String findOnlyName(String songName);
+    @Query("SELECT s.id FROM Song s WHERE s.name = :name")
+    Optional<Integer> findIdByName(@Param("name") String name);
+
 }

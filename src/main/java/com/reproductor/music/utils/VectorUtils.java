@@ -38,7 +38,7 @@ public class VectorUtils {
             }
         }
         for(int i = 0; i < size; i++){
-            data.add(avg[i] / size);
+            data.add(avg[i]/vector.size());
         }
         return data;
     }

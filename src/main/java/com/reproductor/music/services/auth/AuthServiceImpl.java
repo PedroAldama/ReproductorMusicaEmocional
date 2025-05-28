@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -29,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
     @Override
+    @Transactional
     public String login(DTOLogin dtoLogin) {
 
         //AuthenticationManager is used to authenticate the user
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public DTOUserResponse registerUser(DTOUserRegister dtoUserRegister) {
         if (userRepository.existsByUsername(dtoUserRegister.getUsername()) || userRepository.existsByEmail(dtoUserRegister.getEmail())) {
             throw new IllegalArgumentException("username or email address already in use");

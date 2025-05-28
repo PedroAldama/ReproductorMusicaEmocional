@@ -39,9 +39,9 @@ public class FeelingController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addSongFeeling(@RequestBody FeelingsRequest request) {
+    public ResponseEntity<String> addSongFeeling(@RequestBody List<FeelingsRequest> request) {
         feelingsService.addFeelings(request);
-        return  ResponseEntity.ok("Feelings added successfully to " + request.getSongName());
+        return  ResponseEntity.ok("Feelings added successfully");
     }
     @GetMapping("/songs")
     public ResponseEntity<List<DTOSong>> searchSongByUsername(){

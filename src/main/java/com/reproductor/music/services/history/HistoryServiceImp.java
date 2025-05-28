@@ -9,6 +9,7 @@ import com.reproductor.music.services.song.SongService;
 import com.reproductor.music.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -46,6 +47,7 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
+    @Transactional
     public void createHistory(String user) {
         initial();
         History searchHistory = getHistory(new Date());
@@ -65,6 +67,7 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
+    @Transactional
     public void addToHistory(History history) {
         initial();
         List<String> songs = Stream.concat(
@@ -76,6 +79,7 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public History getHistory(Date date) {
         initial();
         return historyRepository
@@ -84,6 +88,7 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<History> getAllHistory() {
         initial();
         String user = userUtils.getCurrentUserName();
@@ -91,6 +96,7 @@ public class HistoryServiceImp implements HistoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<String> getSongsHistory( Date date) {
         History history = getHistory(date);
         return  history != null ? history.getSongs() : List.of();

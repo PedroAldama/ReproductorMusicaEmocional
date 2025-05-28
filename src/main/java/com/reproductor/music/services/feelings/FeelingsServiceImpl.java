@@ -18,8 +18,12 @@ import com.reproductor.music.services.song.SongService;
 import com.reproductor.music.utils.Convert;
 import com.reproductor.music.utils.UserUtils;
 import com.reproductor.music.utils.VectorUtils;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -40,38 +44,46 @@ public class FeelingsServiceImpl implements FeelingsService {
     private final HistoryService historyService;
     private final UserUtils userUtils;
     private  String  userName;
+    private final EntityManager entityManager;
 
     @Override
-    public void addFeelings(FeelingsRequest feelings) {
-        initial();
-        Song song = songService.getSongByName(feelings.getSongName());
-        Users userDb = userRepository.findByUsername(this.userName).orElseThrow();
+    @Transactional
+    public void addFeelings(List<FeelingsRequest> feelings) {
         List<Feelings> feelingList = getAllFeelings();
-        for(int i =0; i < feelings.getFeelings().size(); i++) {
-             SongFeelings newSongFeeling = new SongFeelings();
-             newSongFeeling.setSong(song);
-             newSongFeeling.setFeeling(feelingList.get(i));
-             newSongFeeling.setValue(feelings.getFeelings().get(i));
-             newSongFeeling.setUser(userDb);
-             songFeelingRepository.save(newSongFeeling);
+        List<SongFeelings> songFeelings = new ArrayList<>();
+        Users userDb = userRepository.findByUsername(getCurrentUserName()).orElseThrow();
+        for(FeelingsRequest feeling : feelings) {
+            Song song = entityManager.getReference(Song.class,getSongIdByName(feeling.getSongName()));
+            for(int i =0; i < feeling.getFeelings().size(); i++) {
+            songFeelings.add(SongFeelings.builder()
+                    .feeling(feelingList.get(i))
+                            .song(song)
+                            .user(userDb)
+                            .value(feeling.getFeelings().get(i))
+                    .build()
+            );
         }
+        }
+             songFeelingRepository.saveAll(songFeelings);
     }
 
     @Override
+    @Transactional
     public void updateFeelings(FeelingsRequest feelings) {
-        addFeelings(feelings);
+        addFeelings(List.of(feelings));
     }
 
+    @Transactional
     @Override
     public List<DTOVectorSong> searchSongBySimilarFeelings(String song) {
-        initial();
+        this.userName = getCurrentUserName();
         String songName = songService.getOnlyName(song);
 
         if(songName.isEmpty()) throw new SongExceptions.SongNotFoundException(song);
 
         List<Double> vector = vectorUtils.normalize(songFeelingRepository.findUserSongValues(this.userName,songName));
         if(vector.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<String> songs = getSongByUser(this.userName);
@@ -85,9 +97,10 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .toList();
     }
     @Override
+    @Transactional(readOnly = true)
     public DTOSongFeelings searchByName(String song) {
-        initial();
-        String songName = songService.getSongByName(song).getName();
+        userName = (userName == null) ? getCurrentUserName() : userName;
+        String songName = songService.getOnlyName(song);
 
         if(songName.isEmpty()) throw new SongExceptions.SongNotFoundException(song);
 
@@ -96,8 +109,9 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .feelings(vectorUtils.getFeelingsMap(songFeelings)).build();
     }
     @Override
+    @Transactional(readOnly = true)
     public List<Double> getCurrentFeelingsByUser() {
-        initial();
+        userName = (userName == null) ? getCurrentUserName() : userName;
         String feelings = redisService.getCurrentFeeling(this.userName);
 
         if(feelings != null && !feelings.isEmpty()){
@@ -108,9 +122,10 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DTOVectorSong> findMostSimilarSongs() {
-        initial();
-        List<String> songsOmitted = redisService.getListOf(this.userName);
+        userName = (userName == null) ? getCurrentUserName() : userName;
+        List<String> songsOmitted = redisService.getFullList(this.userName);
 
         //Get all song for user, first check in redis and the count in sql
         List<String> songsName = getSongByUser(this.userName);
@@ -128,8 +143,9 @@ public class FeelingsServiceImpl implements FeelingsService {
                 .toList();
     }
     @Override
+    @Transactional
     public List<Double> createCurrentFeeling(){
-        initial();
+        userName = (userName == null) ? getCurrentUserName() : userName;
         //Get the last 3 songs played by user storage in redis
         List<String> songsName = redisService.getListOf(this.userName);
         int i = 1;
@@ -145,20 +161,21 @@ public class FeelingsServiceImpl implements FeelingsService {
         //if songsName.isEmpty() return not found any song in the history
         //Get the Songs from song service, I need to change this using redis instead to improve performance
         List<List<Double>> data = songsName.stream().map( s-> getDoubles(this.userName,s)).toList();
-        List<Double> res = vectorUtils.average(data);
+        List<Double> res = vectorUtils.normalize(vectorUtils.average(data));
         redisService.setCurrentFeeling(this.userName,res);
         return res;
     }
     @Override
+    @Transactional(readOnly = true)
     public List<DTOSong> searchByUsername() {
-        initial();
-        return Convert.convertSongList(songFeelingRepository.getSongsByUser(this.userName));
+        return Convert.convertSongList(songFeelingRepository.getSongsByUser(getCurrentUserName()));
     }
 
     @Override
+    @Transactional
     public DTOSong recommendationWebSocket() {
         DTOVectorSong song = findMostSimilarSongs().stream().findFirst().get();
-        UpdateUserFeelings(song);
+        updateUserFeelings(song);
         return DTOSong.builder().name(song.getTitle()).src(songService.getSrc(song.getTitle())).build();
     }
 
@@ -167,7 +184,8 @@ public class FeelingsServiceImpl implements FeelingsService {
         this.userName = user;
     }
 
-    private List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames
+    @Transactional
+    public List<DTOVectorSong> getFeelingsForSongListSimilarity(String username, List<String> songNames
             , List<Double> userVector) {
 
         List<DTOVectorSong> result = new ArrayList<>();
@@ -196,11 +214,13 @@ public class FeelingsServiceImpl implements FeelingsService {
         return result;
     }
 
-    private List<Double> getDoubles(String username, String songName) {
+    @Transactional(readOnly = true)
+    public List<Double> getDoubles(String username, String songName) {
         return songFeelingRepository.findUserSongValues(username, songName);
     }
 
-    private List<String> getSongByUser(String user){
+    @Transactional(readOnly = true)
+    public List<String> getSongByUser(String user){
         List<String> songsName = redisService.getUserSongsVectorCurrentlyStorage(user).stream().map(String::valueOf).toList();
         //verify if the songs on
         if(songsName.size() < songFeelingRepository.countSongByUser(user)){
@@ -209,22 +229,30 @@ public class FeelingsServiceImpl implements FeelingsService {
         }
         return  songsName;
     }
-    private void initial(){
-        if (this.userName == null){
-            this.userName = userUtils.getCurrentUserName();
-        }
-    }
-
-    private void UpdateUserFeelings(DTOVectorSong song){
+    @Transactional
+    public void updateUserFeelings(DTOVectorSong song){
         //When a song is recommended, update the feeling vector to send new songs
         List<Double> newFeelings = vectorUtils.average(
                 List.of(getCurrentFeelingsByUser(),song.getFeelings()));
         redisService.addSongToList(this.userName, song.getTitle());
         redisService.setCurrentFeeling(this.userName,newFeelings);
     }
-
-    private List<Feelings> getAllFeelings(){
+    @Transactional(readOnly = true)
+    public List<Feelings> getAllFeelings(){
+        //Getting from Redis or Mysql
         return feelingsRepository.findAll();
     }
+    private int getSongIdByName(String songName) {
+        return songService.findIdBySongName(songName);
+    }
+
+    public String getCurrentUserName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication != null && authentication.isAuthenticated()) {
+            return authentication.getName();
+        }
+        return null;
+    }
+
 }
 
