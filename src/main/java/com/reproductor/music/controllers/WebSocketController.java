@@ -2,7 +2,7 @@ package com.reproductor.music.controllers;
 
 import com.reproductor.music.dto.request.DTOInteraction;
 import com.reproductor.music.dto.response.DTOSong;
-import com.reproductor.music.services.feelings.FeelingsService;
+import com.reproductor.music.services.feelings.websocket.WebSocketFeelingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -16,13 +16,12 @@ import java.security.Principal;
 public class WebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final FeelingsService feelingsService;
+    private final WebSocketFeelingsService webSocketFeelingsService;
 
     @MessageMapping("/recommend/interaction")
     public void handleInteraction(@Payload DTOInteraction interaction, Principal principal) {
         String username = principal.getName();
-        feelingsService.setUser(username);
-        DTOSong nextSong = feelingsService.recommendationWebSocket();
+        DTOSong nextSong = webSocketFeelingsService.recommendationWebSocket(username);
 
         messagingTemplate.convertAndSendToUser(username,
                 "/queue/recommendation",
