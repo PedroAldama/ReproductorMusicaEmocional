@@ -37,7 +37,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                attributes.put("username", username); // opcional
+                attributes.put("username", username);
                 return true;
             } else {
                 response.setStatusCode(HttpStatus.CREATED);

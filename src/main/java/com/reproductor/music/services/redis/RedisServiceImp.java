@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class RedisServiceImp {
+public class RedisServiceImp{
 
     private final StringRedisTemplate redisTemplate;
     private static final String LIST_KEY = "list";

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -24,12 +25,12 @@ public class FeelingController {
     }
 
     @GetMapping("/similarSongs")
-    public ResponseEntity<List<DTOVectorSong>> test() {
-        return ResponseEntity.ok(feelingsService.findMostSimilarSongs());
+    public ResponseEntity<List<DTOVectorSong>> test(Principal principal) {
+        return ResponseEntity.ok(feelingsService.findMostSimilarSongs(principal.getName()));
     }
     @GetMapping("/currentValues")
-    public ResponseEntity<List<Double>> avg() {
-        return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser());
+    public ResponseEntity<List<Double>> avg(Principal principal) {
+        return ResponseEntity.ok(feelingsService.getCurrentFeelingsByUser(principal.getName()));
     }
 
 

@@ -9,13 +9,10 @@ import java.util.List;
 
 public interface FeelingsService {
     void addFeelings(List<FeelingsRequest> feelings);
-    void updateFeelings(FeelingsRequest feelings);
     List<DTOVectorSong> searchSongBySimilarFeelings(String song);
     DTOSongFeelings searchByName(String name);
-    List<Double> getCurrentFeelingsByUser();
-    List<DTOVectorSong> findMostSimilarSongs();
-    List<Double> createCurrentFeeling();
+    List<Double> getCurrentFeelingsByUser(String userName);
+    List<DTOVectorSong> findMostSimilarSongs(String userName);
+    List<Double> createCurrentFeeling(String username);
     List<DTOSong> searchByUsername();
-    DTOSong recommendationWebSocket();
-    void setUser(String user);
 }

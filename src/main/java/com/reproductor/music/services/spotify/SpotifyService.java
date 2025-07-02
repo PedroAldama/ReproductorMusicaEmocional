@@ -4,7 +4,7 @@ import com.reproductor.music.dto.response.DTOSong;
 
 import java.util.List;
 
-public interface SpotifyService {
+public interface  SpotifyService {
     String getAccessToken();
     List<DTOSong> searchAndSaveSongs(String query);
 

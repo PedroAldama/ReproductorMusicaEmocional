@@ -4,6 +4,7 @@ import com.reproductor.music.dto.response.DTOSong;
 import com.reproductor.music.entities.Song;
 import com.reproductor.music.exceptions.SongExceptions;
 import com.reproductor.music.repositories.SongRepository;
+import com.reproductor.music.services.cache.FeelingSongCacheService;
 import com.reproductor.music.services.redis.RedisServiceImp;
 import com.reproductor.music.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class SongServiceImpl implements SongService {
 
     private static final String BASE_FOLDER = "C:/Users/Pedro/Desktop/songs/MusicFile/";
     private final SongRepository songRepository;
-    private final RedisServiceImp redisService;
+    private final FeelingSongCacheService redisService;
     private final UserUtils userUtils;
 
     @Override
@@ -50,7 +51,7 @@ public class SongServiceImpl implements SongService {
         String user = userUtils.getCurrentUserName();
         DTOSong songResponse =  convertSongToDto(songRepository.findByName(name)
                 .orElseThrow(() -> new SongExceptions.SongNotFoundException(name + " Not found")));
-        redisService.addSongToList(user,songResponse.getName());
+        redisService.addSongToHistory(user,songResponse.getName());
         return songResponse;
     }
 
