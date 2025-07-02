@@ -12,6 +12,7 @@ import com.reproductor.music.repositories.FeelingsRepository;
 import com.reproductor.music.dto.request.FeelingsRequest;
 import com.reproductor.music.repositories.SongFeelingRepository;
 import com.reproductor.music.repositories.UserRepository;
+import com.reproductor.music.services.cache.FeelingSongCacheService;
 import com.reproductor.music.services.history.HistoryService;
 import com.reproductor.music.services.redis.RedisServiceImp;
 import com.reproductor.music.services.song.SongService;
@@ -36,12 +37,12 @@ public class FeelingsServiceImpl implements FeelingsService {
 
     private final FeelingsRepository feelingsRepository;
     private final SongFeelingRepository songFeelingRepository;
-    private final RedisServiceImp redisService;
     private final VectorUtils vectorUtils;
     private final UserRepository userRepository;
     private final SongService songService;
     private final HistoryService historyService;
     private final EntityManager entityManager;
+    private final FeelingSongCacheService cacheService;
 
 
     @Override
@@ -103,19 +104,17 @@ public class FeelingsServiceImpl implements FeelingsService {
 
     @Override
     public List<Double> getCurrentFeelingsByUser(String userName) {
-        String feelings = redisService.getCurrentFeeling(userName);
+        List<Double> vector = cacheService.getCurrentFeeling(userName);
 
-        if(feelings != null && !feelings.isEmpty()){
-            return Arrays.stream(feelings.split(",")).map(Double::valueOf).toList();
-        }
+        if(vector.isEmpty()) createCurrentFeeling(userName);
 
-        return createCurrentFeeling(userName);
+        return vector;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<DTOVectorSong> findMostSimilarSongs(String userName) {
-        List<String> songsOmitted = redisService.getFullList(userName);
+        List<String> songsOmitted = cacheService.getFullUserSongList(userName);
 
         //Get all song for user, first check in redis and the count in sql
         List<String> songsName = getSongByUser(userName);
@@ -136,7 +135,7 @@ public class FeelingsServiceImpl implements FeelingsService {
     @Override
     public List<Double> createCurrentFeeling(String userName){
         //Get the last 3 songs played by user storage in redis
-        List<String> songsName = redisService.getListOf(userName);
+        List<String> songsName = cacheService.getSongHistory(userName);
         int i = 1;
         while(songsName.isEmpty() && i < 4){
             LocalDate localDate = new Date().toInstant()
@@ -151,7 +150,7 @@ public class FeelingsServiceImpl implements FeelingsService {
         //Get the Songs from song service, I need to change this using redis instead to improve performance
         List<List<Double>> data = songsName.stream().map( s-> getDoubles(userName,s)).toList();
         List<Double> res = vectorUtils.normalize(vectorUtils.average(data));
-        redisService.setCurrentFeeling(userName,res);
+        cacheService.setCurrentFeeling(userName,res);
         return res;
     }
 
@@ -167,14 +166,11 @@ public class FeelingsServiceImpl implements FeelingsService {
         List<DTOVectorSong> result = new ArrayList<>();
 
         for (String songName : songNames) {
-            List<Double> songVector = redisService.getUserSongVector(username, songName);
+            List<Double> songVector = cacheService.getUserSongVector(username, songName);
 
             if (songVector.isEmpty()) {
                 songVector = vectorUtils.normalize(getDoubles(username, songName));
-                String raw = songVector.stream().map(String::valueOf).collect(Collectors.joining(","));
-                String key = String.format("feelings:%s:%s", username, songName);
-                redisService.saveUserSongVectorToRedis(key, raw);
-                redisService.setUserSongsVectorCurrentlyStorage(username,songName);
+                cacheService.saveUserSongVector(username, songName, songVector);
             }
             if (!songVector.isEmpty()) {
                 double similarity = vectorUtils.cosineSimilarity(userVector, songVector);
@@ -195,11 +191,11 @@ public class FeelingsServiceImpl implements FeelingsService {
     }
 
     public List<String> getSongByUser(String user){
-        List<String> songsName = redisService.getUserSongsVectorCurrentlyStorage(user).stream().map(String::valueOf).toList();
+        List<String> songsName = cacheService.getUserCachedSongs(user);
         //verify if the songs on redis
         if(songsName.size() < songFeelingRepository.countSongByUser(user)){
             songsName = songFeelingRepository.getSongsNameByUser(user);
-            songsName.forEach(s -> redisService.setUserSongsVectorCurrentlyStorage(user,s));
+            songsName.forEach(s -> cacheService.cacheUserSong(user,s));
         }
         return  songsName;
     }

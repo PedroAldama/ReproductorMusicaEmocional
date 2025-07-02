@@ -25,7 +25,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
-    private JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
@@ -33,16 +33,12 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public String login(DTOLogin dtoLogin) {
 
-        //AuthenticationManager is used to authenticate the user
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dtoLogin.getUsername(), dtoLogin.getPassword())
         );
 
-        /*SecurityContextHolder is used to allows the rest of the application to know
-        that the user is authenticated and can use user data from Authentication object */
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate the token based on username and secret key
         return jwtTokenProvider.generateToken(authentication);
     }
 
