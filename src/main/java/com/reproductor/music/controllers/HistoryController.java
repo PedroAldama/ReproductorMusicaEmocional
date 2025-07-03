@@ -5,6 +5,8 @@ import com.reproductor.music.services.history.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -23,7 +25,8 @@ public class HistoryController {
 
     @GetMapping("/user")
     public History getUserHistory(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date date){
-        return historyService.getHistory(date);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return historyService.getHistory(date, auth.getName());
     }
 
     @PostMapping("/add")

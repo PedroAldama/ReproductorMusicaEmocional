@@ -21,36 +21,14 @@ public class HistoryServiceImp implements HistoryService {
 
     private final HistoryRepository historyRepository;
     private final UserUtils userUtils;
-    private final SongService songService;
     private final RedisServiceImp redisService;
+    private final HistoryServiceTransactions historyTransactions;
 
-    private String userName;
-
-    @Override
-    public List<Song> recommendByEmotion() {
-        initial();
-        List<History> histories = historyRepository.findByUserOrderByCreationDesc(this.userName);
-        if (histories.isEmpty()) return new ArrayList<>();
-        List<String> lastSongs = histories.getFirst().getSongs();
-
-        Map<String, Integer> feelSum = new HashMap<>();
-
-        for (String song : lastSongs) {
-            List<SongFeelings> emotions = songService.getSongByName(song).getSongFeelings();
-            for (SongFeelings e : emotions) {
-                String feeling = e.getFeeling().getFeeling();
-                feelSum.put(feeling, (int) (feelSum.getOrDefault(feeling, 0) + e.getValue()));
-            }
-        }
-        String principal = Collections.max(feelSum.entrySet(), Map.Entry.comparingByValue()).getKey();
-        return List.of();
-    }
 
     @Override
     @Transactional
     public void createHistory(String user) {
-        initial();
-        History searchHistory = getHistory(new Date());
+        History searchHistory = historyTransactions.getHistory(new Date(),user);
         if(searchHistory == null) {
             History history = History.builder()
                     .id(new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + user)
@@ -60,50 +38,21 @@ public class HistoryServiceImp implements HistoryService {
                     .build();
                     historyRepository.save(history);
         }else {
-            addToHistory(searchHistory);
+            historyTransactions.addToHistory(searchHistory);
         }
 
         redisService.clearList(user);
     }
 
     @Override
-    @Transactional
-    public void addToHistory(History history) {
-        initial();
-        List<String> songs = Stream.concat(
-                redisService.getFullList(this.userName).stream(),
-                history.getSongs().stream()
-        ).toList();
-        history.setSongs(songs);
-        historyRepository.save(history);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public History getHistory(Date date) {
-        initial();
-        return historyRepository
-                .findById(new SimpleDateFormat("dd-MM-yyyy").format(date) + this.userName)
-                .orElse(null);
+    public History getHistory(Date date, String user) {
+        return historyTransactions.getHistory(date,user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<History> getAllHistory() {
-        initial();
         String user = userUtils.getCurrentUserName();
         return historyRepository.findAllByUserOrderByCreationDesc(user);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<String> getSongsHistory( Date date) {
-        History history = getHistory(date);
-        return  history != null ? history.getSongs() : List.of();
-    }
-    private void initial(){
-        if (this.userName == null){
-            this.userName = userUtils.getCurrentUserName();
-        }
     }
 }

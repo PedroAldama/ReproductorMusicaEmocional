@@ -142,7 +142,7 @@ public class FeelingsServiceImpl implements FeelingsService {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                     .minusDays(i);
-            songsName = historyService.getSongsHistory(Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))
+            songsName = historyService.getHistory(Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),userName).getSongs()
                     .stream().distinct().toList();
             i++;
         }

@@ -7,10 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface HistoryService {
-    List<Song> recommendByEmotion();
     void createHistory(String user);
-    void addToHistory(History history);
-    History getHistory(Date date);
+    History getHistory(Date date,String user);
     List<History> getAllHistory();
-    List<String> getSongsHistory(Date date);
 }
